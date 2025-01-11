@@ -1,0 +1,322 @@
+/* ----------------------------------------------------------
+   Basic styling for the entire page with simple white textured background
+----------------------------------------------------------- */
+body {
+    font-family: 'Arial', sans-serif; /* Clean and professional font for readability */
+    background-color: #f8f8f8; /* Off-white background color */
+    background-image: 
+        radial-gradient(circle, #f7f7f7 20%, transparent 20%),
+        radial-gradient(circle, transparent 20%, #f7f7f7 20%, transparent 30%);
+    background-size: 10px 10px, 30px 30px; /* Layered texture sizes */
+    background-position: 0 0, 10px 10px;   /* Offset layers for a subtle texture effect */
+    color: #333; /* Dark gray for text, offering good contrast on light background */
+}
+
+/* ----------------------------------------------------------
+   Main container for content, centered with padding
+----------------------------------------------------------- */
+.container {
+    width: 80%; /* Limits the content width to 80% of the viewport width for better readability */
+    margin: 0 auto; /* Centers the container horizontally */
+    padding: 50px 0; /* Vertical padding for space above and below the content */
+}
+
+/* ----------------------------------------------------------
+   Styling for section titles with a custom, elegant font
+----------------------------------------------------------- */
+.section-title {
+    font-size: 3em; /* Large font size for prominence */
+    font-weight: bold; /* Bold font weight to highlight section headings */
+    font-family: 'Dancing Script', cursive; /* Cursive font for a unique, aesthetic appeal */
+    color: #000; /* Black color for strong visibility */
+    background: none; /* No background to keep focus on the text */
+    text-transform: capitalize; /* Capitalize first letter of each word for a polished look */
+    margin-bottom: 30px; /* Space below the title */
+}
+
+/* ----------------------------------------------------------
+   Flexbox settings for content sections to align items neatly
+----------------------------------------------------------- */
+.about-content, .text-content {
+    font-size: 1em;
+    display: flex;       /* Uses flexbox to lay out children inline */
+    align-items: center; /* Vertically centers the items within their container */
+    margin-top: 20px;    /* Space above each content section for visual separation */
+}
+
+/* ----------------------------------------------------------
+   Styling for profile images
+----------------------------------------------------------- */
+.profile-img {
+    width: 250px;
+    height: 250px;
+    border-radius: 10px;
+    border: 10px solid white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+    margin-right: 40px;
+}
+
+/* ----------------------------------------------------------
+   Paragraph styling in text content areas
+----------------------------------------------------------- */
+.text-content p {
+    margin: 5px 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* ----------------------------------------------------------
+   Logo positioning and styling (top-right corner)
+----------------------------------------------------------- */
+.logo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 100px;
+    height: 100px;
+    z-index: 1000;
+}
+
+.logo img {
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+}
+
+/* ----------------------------------------------------------
+   Experience section items
+----------------------------------------------------------- */
+.experience-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.experience-logo {
+    width: 60px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.experience-info h3 {
+    font-size: 1.3em;
+    color: #333;
+    margin: 0;
+}
+
+.experience-info .tenure {
+    font-size: 0.9em;
+    font-style: italic;
+    color: #666;
+}
+
+.experience-info p {
+    margin: 5px 0;
+    color: #333;
+    font-size: 1em;
+}
+
+/* ----------------------------------------------------------
+   Repeated .section-title style (combined with the one above)
+   (No conflict, but ensuring margin-bottom is set consistently)
+----------------------------------------------------------- */
+.section-title {
+    font-size: 3em;
+    font-weight: bold;
+    font-family: 'Dancing Script', cursive;
+    color: #000;
+    margin-bottom: 30px; /* space below the title */
+}
+
+/* Ensures the container is still correctly set */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+/* ----------------------------------------------------------
+   Role styling in the experience entries
+----------------------------------------------------------- */
+.experience-info strong {
+    display: block;
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Additional paragraph styling for experience descriptions */
+.experience-info p {
+    margin-top: 2px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+/* ----------------------------------------------------------
+   PUBLICATIONS & ARTICLES (MODIFIED STYLES)
+----------------------------------------------------------- */
+.publications .publication {
+    background: #f4f4f4; /* Light grey background for visual consistency */
+    border: 1px solid #ddd; /* Subtle border for definition */
+    padding: 20px; /* Padding around the content for spacing */
+    margin-bottom: 20px; /* Space between each publication */
+}
+
+/* Publication header (logo + name side by side) */
+.publication-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px; /* Space below the header before articles */
+}
+
+.publication-header img {
+    width: 50px;      /* Fixed width for publication logos */
+    height: auto;     /* Maintain aspect ratio */
+    margin-right: 15px;
+}
+
+/* Publication title (e.g., TDS, Towards AI) */
+.publication-header h3 {
+    color: #333;
+    margin: 0; /* Removes default heading margin for neat alignment */
+}
+
+/* Container for articles within each publication */
+.articles {
+    display: flex;       /* Aligns articles horizontally on large screens */
+    flex-wrap: wrap;     /* Wraps if not enough space */
+    gap: 20px;           /* Space between article boxes */
+}
+
+/* Each article (clickable box) */
+.article-box {
+    display: flex;             /* Image on the left, text on the right */
+    background: #fff;          /* White background for contrast */
+    border: 1px solid #ddd;    /* Subtle border to outline the box */
+    padding: 10px;             /* Space inside the box */
+    width: 100%;               /* Ensure the box uses available width */
+    transition: box-shadow 0.3s ease;
+    cursor: pointer;           /* Indicate clickable area */
+}
+
+/* Hover effect for the clickable box */
+.article-box:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Thumbnail image: smaller size */
+.article-image {
+    width: 100px;  /* Reduced size */
+    height: auto;
+    margin-right: 15px; /* Space to separate image from text */
+}
+
+/* Text container on the right side of the image */
+.article-text {
+    display: flex;
+    flex-direction: column; /* Title above description */
+    justify-content: center;
+}
+
+/* Article title */
+.article-title {
+    font-size: 1.2em; 
+    color: #333;
+    margin: 0 0 8px; /* Space below title */
+}
+
+/* Article description text */
+.article-description {
+    font-size: 1em;
+    line-height: 1.5;
+    color: #555;
+    margin: 0; /* Remove default paragraph margin */
+}
+
+/* "Read more" link styling */
+.read-more {
+    color: #0066cc; 
+    font-weight: 600;
+}
+
+/* Links should not be underlined and should adopt the container's layout */
+.articles article a {
+    text-decoration: none;
+    color: inherit; /* Inherit color from parent */
+    display: block; /* Make the entire box clickable */
+}
+
+/* Responsive: stack articles vertically on smaller screens */
+@media (max-width: 600px) {
+    .articles {
+        flex-direction: column; /* One column on small screens */
+    }
+    .article-box {
+        flex-direction: column; /* Stack the image above text */
+        align-items: center;    /* Center contents */
+    }
+    .article-image {
+        margin-right: 0;       /* Remove horizontal spacing */
+        margin-bottom: 10px;   /* Add vertical spacing instead */
+    }
+    .article-text {
+        align-items: center;   /* Center text on small screens */
+        text-align: center;
+    }
+    .article-title {
+        margin: 0 0 8px;       /* Adjust spacing */
+    }
+}
+
+/* ----------------------------------------------------------
+   END PUBLICATIONS & ARTICLES STYLES
+----------------------------------------------------------- */
+
+/* Position the social container at the top-left */
+.social-container {
+    position: absolute;  /* or 'fixed' if you want it to stay on scroll */
+    top: 20px;
+    left: 35px;
+    z-index: 9999; /* Ensure it's above other elements */
+  }
+  
+  /* Horizontal layout for the icons */
+  .social-links {
+    list-style-type: none; /* Remove default list styling */
+    margin: 0;
+    padding: 0;
+    display: flex;        /* Lay them out side by side */
+    gap: 25px;            /* Space between icons */
+    align-items: center;  /* Vertically center the icons if needed */
+  }
+  
+  /* Each item in the list */
+  .social-links li {
+    display: inline-block; /* or inline-flex */
+  }
+  
+  /* Anchor styling */
+  .social-links li a {
+    text-decoration: none; /* No underline */
+    display: inline-block;  /* Make entire image clickable */
+  }
+  
+  /* The icon images */
+  .social-icon {
+    width: 35px;   /* Adjust size to your liking */
+    height: 35px;  /* Keep consistent aspect ratio (or auto) */
+    transition: transform 0.2s ease;
+    object-fit: contain; /* In case images have different aspect ratios */
+  }
+  
+  /* Hover effect to slightly enlarge icons for an aesthetic look */
+  .social-icon:hover {
+    transform: scale(1.1);
+  }
+  
