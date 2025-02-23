@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Existing Google Font -->
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Existing Google Font (kept as is) -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Additional Google Font for classic/aesthetic headings -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +16,26 @@
 
     <!-- Your main stylesheet -->
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Inline style to ensure uniform font size and new heading style -->
+    <style>
+        /* Make all regular text uniform in size */
+        body,
+        p,
+        li,
+        a,
+        .tenure,
+        .project-description,
+        .experience-info p {
+            font-size: 16px;
+        }
+
+        /* Apply the new, classic/aesthetic font to headings */
+        h2.section-title,
+        h3 {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
 </head>
 <body>
 
@@ -40,9 +66,20 @@
             <img src="assets/images/twitter.png" alt="Twitter Icon" class="social-icon">
           </a>
         </li>
-      </ul>
-    </div>
-    <!-- End Social/Contact Icons -->
+<!-- Resume -->
+<li>
+  <a href="https://drive.google.com/file/d/1J8tHzWtC_cHXWzt33OGfw-BhGMvSwsFc/view?usp=sharing" 
+     title="Resume" 
+     target="_blank"
+     style="display: flex; align-items: center; text-decoration: none;"
+  >
+    <img src="assets/images/resume icon.png" alt="View My Resume" class="social-icon" style="margin-right: 8px;">
+    <span style="font-style: italic; font-size: 12px;">(View My Resume)</span>
+  </a>
+</li>
+</ul>
+</div>
+<!-- End Social/Contact Icons -->
 
     <div class="logo">
         <img src="assets/images/logo.png" alt="r4plh Logo">
@@ -88,7 +125,7 @@
             <h3>Job Twine</h3>
             <p class="tenure">Dec 2024 - Present</p>
             <p><strong>Generative AI Intern</strong></p>
-            <p>As a software engineer intern at Job Twine, I contributed to various projects focusing on optimizing machine learning algorithms for better efficiency and performance in real-time systems. My work included developing and refining algorithms that significantly improved system responsiveness and accuracy.</p>
+            <p>As a Machine Learning Intern at JobTwine, I developed the Playbook feature, an intelligent interview creation tool that automates customized round and question generation using OpenAI APIs and LangChain. I built scalable APIs with a "min-to-max" approach, enabling users to create interviews from job titles to detailed specifications, improving customization by 60%. Leveraging RAG with PostgreSQL and Redis, I optimized skill retrieval and interview configuration management, reducing update times by 50%. Collaborating closely with the CTO, I refined product requirements and solved production issues, driving a 40% boost in user engagement and product quality (more details in resume above)</p>
           </div>
         </div>
         <!-- Suryavanshi Ventures Experience -->
@@ -98,7 +135,7 @@
             <h3>Suryavanshi Ventures</h3>
             <p class="tenure">Jan 2024 - July 2024</p>
             <p><strong>Artifical Intelligence Intern</strong></p>
-            <p>At Suryavanshi Ventures, I led a team of developers in a large-scale software development project aimed at enhancing client data security and processing speeds. My leadership contributed to the successful deployment of critical software updates that bolstered our cybersecurity measures and streamlined client operations.</p>
+            <p>During my internship, I developed an AI-powered conversational training platform for 5-star hotel staff, designed to simulate realistic customer interactions and provide real-time feedback. The platform served as a training tool to enhance staff knowledge and professionalism across key hotel services like dining, rooms, and amenities etc. By leveraging openAI models, RAG-based search, and parallel processing, the system improved training accuracy by 50% and reduced latency by 30%, ensuring efficient and effective staff evaluation and development (more details in resume above)</p>
           </div>
         </div>
       </div>
@@ -108,8 +145,57 @@
       <div class="container">
         <h2 class="section-title">Projects</h2>
         <div class="text-content">
-          <p>Details about your projects go here...</p>
         </div>
+  
+        <!-- Projects List -->
+        <ul class="projects-list">
+          <!-- Project 1 -->
+          <li class="project-item">
+            <img 
+              src="assets/images/Website-ss.png" 
+              alt="Project 1 Thumbnail" 
+              class="project-thumb"
+            >
+            <div class="project-details">
+              <h3 class="project-title">GitHub Issues Semantic Search Engine</h3>
+              <p class="project-description">
+                I utilized the GitHub REST API to build a robust data pipeline, fetching and filtering issue and comment data to enhance relevance for semantic search. By selectively extracting comments with 15+ words and implementing efficient caching, I streamlined data retrieval and improved system performance (more details in resume above).
+                <a 
+                  href="https://github.com/r4plh/GISS" 
+                  target="_blank" 
+                  rel="noopener" 
+                  class="project-link"
+                >
+                  View Project
+                </a>
+              </p>
+            </div>
+          </li>
+    
+          <!-- Project 2 -->
+          <li class="project-item">
+            <img 
+              src="assets/images/Screenshot 2025-02-23 at 5.46.37 PM.png" 
+              alt="Project 2 Thumbnail" 
+              class="project-thumb"
+            >
+            <div class="project-details">
+              <h3 class="project-title">Short Listing Agent</h3>
+              <p class="project-description">
+                I built a two-stage AI resume screening system combining NLP-based keyword/semantic search and a Vision Language Model (Gemini 1.5 Pro) to evaluate candidates. The system extracts and scores resumes based on job descriptions, identifies product-based experience, and summarizes years of relevant work, streamlining candidate evaluation with high accuracy and efficiency
+                <a 
+                  href="https://drive.google.com/drive/folders/1-lvaFAZ05qtuJvCoyvSmca_Mr27VMsOC?usp=sharing" 
+                  target="_blank" 
+                  rel="noopener" 
+                  class="project-link"
+                >
+                  View Project
+                </a>
+              </p>
+            </div>
+          </li>
+        </ul>
+        <!-- End Projects List -->
       </div>
     </section>
 
@@ -119,8 +205,7 @@
         <h2 class="section-title">Articles</h2>
         <div class="text-content">
           <p>
-            Explore my published works across various top-tier publications in the field of data science and artificial intelligence. 
-            Each article reflects my insights and analyses, contributing to the broader AI community.
+            I am passionate about writing and sharing knowledge through Medium articles, with over 15k views, and contribute as a writer to leading publications like Towards Data Science, Towards AI, and AI Advances. My work focuses on exploring and disseminating insights in data science, AI, and technology
           </p>
         </div>
 

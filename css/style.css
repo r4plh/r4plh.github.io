@@ -320,3 +320,69 @@ body {
     transform: scale(1.1);
   }
   
+  /* ---------------------------------------------
+   PROJECTS SECTION STYLES
+   Minimal styling for a simple list of projects
+---------------------------------------------- */
+
+/* Container for the entire list of projects */
+.projects-list {
+    list-style-type: none; /* Removes default bullet points */
+    margin: 0;            /* Resets default list margins */
+    padding: 0;           /* Resets default list padding */
+  }
+  
+  /* Each project item in the list */
+  .project-item {
+    display: flex;             /* Places thumbnail & text side by side */
+    align-items: center;       /* Vertically center the items */
+    margin-bottom: 20px;       /* Spacing between projects */
+  }
+  
+  /* Thumbnail image for the project */
+  .project-thumb {
+    width: 80px;               /* Adjust for desired thumbnail size */
+    height: 80px;              /* Keep it square by matching width */
+    object-fit: cover;         /* Ensures image covers the square neatly */
+    border-radius: 4px;        /* Small rounding of corners for aesthetics */
+    margin-right: 15px;        /* Spacing between image and text */
+    /* You can add a border or shadow if you like:
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    */
+  }
+  
+  /* Container for the title and description */
+  .project-details {
+    display: flex;
+    flex-direction: column; /* Stack title above description */
+  }
+  
+  /* Bold, larger title for each project */
+  .project-title {
+    font-size: 1.2em;    /* Slightly larger than normal text */
+    font-weight: bold;   /* Bold text */
+    margin: 0 0 5px;     /* Space below the title */
+  }
+  
+  /* Brief description of the project */
+  .project-description {
+    font-size: 1em;      /* Normal text size */
+    line-height: 1.4;    /* Slight line spacing for readability */
+    margin: 0;           /* Remove default paragraph margins */
+  }
+  
+  /* Underlined link for the project; smaller text size if desired */
+  .project-link {
+    text-decoration: underline; /* Underline to indicate it's a link */
+    font-size: 0.95em;          /* Slightly smaller than the description */
+    color: #0066cc;            /* Or a color of your choice */
+    margin-left: 5px;          /* Small space before link, if needed */
+  }
+  
+  /* You can add a hover effect on the link if you want:
+  .project-link:hover {
+    color: #003366;
+  }
+  */
+  
