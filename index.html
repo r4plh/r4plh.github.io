@@ -4,372 +4,1371 @@
     <!-- Preconnect for Google Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Existing Google Font (kept as is) -->
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-
-    <!-- Additional Google Font for classic/aesthetic headings -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Portfolio</title>
+    <title>Aman Agrawal - Portfolio</title>
 
-    <!-- Your main stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
-
-    <!-- Inline style to ensure uniform font size and new heading style -->
     <style>
-        /* Make all regular text uniform in size */
-        body,
-        p,
-        li,
-        a,
-        .tenure,
-        .project-description,
-        .experience-info p {
-            font-size: 16px;
+        /* ----------------------------------------------------------
+           GLOBAL STYLES & VARIABLES
+        ----------------------------------------------------------- */
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #e94560;
+            --gold-accent: #d4af37;
+            --text-primary: #2c2c54;
+            --text-secondary: #6c7293;
+            --text-light: #a8a8b3;
+            --background-primary: #fafbfc;
+            --background-secondary: #ffffff;
+            --border-color: #e8eaed;
+            --shadow-light: 0 4px 20px rgba(26, 26, 46, 0.08);
+            --shadow-medium: 0 8px 30px rgba(26, 26, 46, 0.12);
+            --shadow-heavy: 0 15px 50px rgba(26, 26, 46, 0.15);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-subtle: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
         }
 
-        /* Apply the new, classic/aesthetic font to headings */
-        h2.section-title,
-        h3 {
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background-primary);
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(103, 126, 234, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(232, 69, 96, 0.03) 0%, transparent 50%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED ANIMATIONS & MICRO-INTERACTIONS
+        ----------------------------------------------------------- */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .logo {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .profile-img {
+            animation: slideInFromLeft 0.8s ease-out;
+        }
+
+        .text-content {
+            animation: slideInFromRight 0.8s ease-out 0.2s both;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED HOVER EFFECTS
+        ----------------------------------------------------------- */
+        .experience-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .experience-item:hover::after {
+            transform: translateX(100%);
+        }
+
+        .project-item {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .project-item:hover::before {
+            left: 100%;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED TYPOGRAPHY EFFECTS
+        ----------------------------------------------------------- */
+        .section-title {
+            position: relative;
+            background: linear-gradient(45deg, #1a1a2e, #667eea, #764ba2);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .section-title::after {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED VISUAL DEPTH & SHADOWS
+        ----------------------------------------------------------- */
+        .experience-item:hover,
+        .project-item:hover,
+        .publication:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 40px rgba(26, 26, 46, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .article-box:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 
+                0 10px 25px rgba(26, 26, 46, 0.1),
+                0 0 0 1px rgba(103, 126, 234, 0.1);
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED BACKGROUND PATTERNS
+        ----------------------------------------------------------- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(103, 126, 234, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(232, 69, 96, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(212, 175, 55, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED SOCIAL CONTAINER
+        ----------------------------------------------------------- */
+        .social-icon {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-3px) scale(1.1);
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED ARTICLE CARDS
+        ----------------------------------------------------------- */
+        .publication-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .publication-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .publication:hover .publication-header::before {
+            left: 100%;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED PROFILE IMAGE
+        ----------------------------------------------------------- */
+        .profile-img {
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-img::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #667eea);
+            background-size: 400% 400%;
+            border-radius: 25px;
+            z-index: -1;
+            opacity: 0;
+            transition: all 0.3s ease;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .profile-img:hover::before {
+            opacity: 0.7;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED SCROLLBAR
+        ----------------------------------------------------------- */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: linear-gradient(to bottom, #fafbfc, #f0f2f5);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 6px;
+            border: 2px solid #fafbfc;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #5a6fd8, #6a4190);
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED LOADING STATES
+        ----------------------------------------------------------- */
+        .experience-item,
+        .project-item,
+        .publication {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .experience-item:nth-child(1) { animation-delay: 0.1s; }
+        .experience-item:nth-child(2) { animation-delay: 0.2s; }
+        .experience-item:nth-child(3) { animation-delay: 0.3s; }
+
+        .project-item:nth-child(1) { animation-delay: 0.1s; }
+        .project-item:nth-child(2) { animation-delay: 0.2s; }
+
+        .publication:nth-child(1) { animation-delay: 0.1s; }
+        .publication:nth-child(2) { animation-delay: 0.2s; }
+        .publication:nth-child(3) { animation-delay: 0.3s; }
+
+        /* ----------------------------------------------------------
+           ENHANCED TEXT EFFECTS
+        ----------------------------------------------------------- */
+        .text-content a {
+            position: relative;
+            background: linear-gradient(45deg, var(--accent-color), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-content a::after {
+            background: linear-gradient(45deg, var(--accent-color), #764ba2);
+        }
+
+        .tenure {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(233, 69, 96, 0.2);
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED RESPONSIVE ANIMATIONS
+        ----------------------------------------------------------- */
+        @media (max-width: 768px) {
+            .logo {
+                animation: pulse 2s ease-in-out infinite;
+            }
+            
+            .profile-img::before {
+                display: none;
+            }
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED ACCESSIBILITY & FOCUS STATES
+        ----------------------------------------------------------- */
+        .social-links a:focus,
+        .project-link:focus,
+        .article-box:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 4px;
+            border-radius: 8px;
+        }
+
+        /* ----------------------------------------------------------
+           ENHANCED PRINT STYLES
+        ----------------------------------------------------------- */
+        @media print {
+            .social-container,
+            .logo {
+                display: none;
+            }
+            
+            body {
+                background: white;
+            }
+            
+            .container {
+                padding: 20px 0;
+            }
+        }
+
+        /* ----------------------------------------------------------
+           CONTAINER & LAYOUT
+        ----------------------------------------------------------- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 40px 40px 160px;
+            position: relative;
+        }
+
+        /* ----------------------------------------------------------
+           SOCIAL LINKS (TOP-LEFT)
+        ----------------------------------------------------------- */
+        .social-container {
+            position: fixed;
+            top: 30px;
+            left: 40px;
+            z-index: 1000;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            backdrop-filter: none;
+            border: none;
+        }
+
+        .social-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .social-links li a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon {
+            width: 28px;
+            height: 28px;
+            transition: all 0.3s ease;
+            filter: grayscale(0.3);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-2px) scale(1.1);
+            filter: grayscale(0);
+        }
+
+        .social-links li a span {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .social-links li a:hover span {
+            opacity: 1;
+        }
+
+        /* ----------------------------------------------------------
+           LOGO (TOP-RIGHT)
+        ----------------------------------------------------------- */
+        .logo {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            z-index: 1000;
+            background: var(--background-secondary);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .logo img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* ----------------------------------------------------------
+           SECTION TITLES
+        ----------------------------------------------------------- */
+        .section-title {
             font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        /* ----------------------------------------------------------
+           ABOUT SECTION
+        ----------------------------------------------------------- */
+        .about-content {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 40px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .profile-img {
+            width: 200px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: var(--shadow-heavy);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .profile-img::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: var(--gradient-primary);
+            border-radius: 25px;
+            z-index: -1;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .profile-img:hover::before {
+            opacity: 0.1;
+        }
+
+        .profile-img:hover {
+            transform: translateY(-5px);
+        }
+
+        .text-content {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            position: relative;
+            overflow: visible;
+        }
+
+        .text-content::before {
+            display: none;
+        }
+
+        .text-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .text-content strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .text-content a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .text-content a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .text-content a:hover::after {
+            width: 100%;
+        }
+
+        /* ----------------------------------------------------------
+           EXPERIENCE SECTION
+        ----------------------------------------------------------- */
+        .experience-item {
+            background: var(--background-secondary);
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient-secondary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .experience-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .experience-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .experience-item {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .experience-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 15px;
+            padding: 10px;
+            background: var(--background-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .experience-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .tenure {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent-color);
+            background: rgba(233, 69, 96, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .experience-info strong {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .experience-info p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            text-align: justify;
+        }
+
+        /* ----------------------------------------------------------
+           PROJECTS SECTION
+        ----------------------------------------------------------- */
+        .projects-list {
+            list-style: none;
+            display: grid;
+            gap: 20px;
+        }
+
+        .project-item {
+            background: var(--background-secondary);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 30px;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-subtle);
+        }
+
+        .project-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .project-thumb {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .project-item:hover .project-thumb {
+            transform: scale(1.05);
+        }
+
+        .project-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .project-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .project-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .project-link:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        /* ----------------------------------------------------------
+           ARTICLES/PUBLICATIONS SECTION
+        ----------------------------------------------------------- */
+        .publication {
+            background: var(--background-secondary);
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .publication:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .publication-header {
+            background: var(--gradient-primary);
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .publication-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: var(--background-secondary);
+            padding: 8px;
+        }
+
+        .publication-header h3 {
+            font-family: 'Playfair Display', serif;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .articles {
+            padding: 30px;
+            display: grid;
+            gap: 25px;
+        }
+
+        .article-box {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .article-box:hover {
+            background: var(--background-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .article-image {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .article-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .article-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .read-more {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .articles article a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ----------------------------------------------------------
+           RESPONSIVE DESIGN
+        ----------------------------------------------------------- */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 30px 30px 30px 60px;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+
+            .profile-img {
+                width: 180px;
+                height: 220px;
+                margin: 0 auto;
+            }
+
+            .social-container {
+                left: 20px;
+                top: 20px;
+            }
+
+            .logo {
+                right: 20px;
+                top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px 20px;
+            }
+
+            .experience-item,
+            .project-item,
+            .article-box {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .social-container {
+                position: relative;
+                left: auto;
+                top: auto;
+                margin-bottom: 15px;
+                width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .social-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .logo {
+                position: relative;
+                right: auto;
+                top: auto;
+                width: fit-content;
+                margin: 0 auto 15px;
+            }
+
+            .section-title {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .social-links {
+                gap: 15px;
+            }
+
+            .social-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .profile-img {
+                width: 160px;
+                height: 200px;
+            }
+
+            .experience-item,
+            .project-item,
+            .publication {
+                padding: 20px;
+            }
+        }
+
+        /* ----------------------------------------------------------
+           PREMIUM TOUCHES
+        ----------------------------------------------------------- */
+        .section {
+            position: relative;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--border-color), transparent);
+            transform: translateX(-50%);
+        }
+
+        /* Subtle background pattern */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(103, 126, 234, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(232, 69, 96, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Enhanced scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
         }
     </style>
 </head>
 <body>
-
-    <!-- Social/Contact Icons at top-left (using local images) -->
+    <!-- Social/Contact Icons -->
     <div class="social-container">
-      <ul class="social-links">
-        <!-- LinkedIn -->
-        <li>
-          <a href="https://www.linkedin.com/in/r4plh/" title="LinkedIn" target="_blank">
-            <img src="assets/images/linkedin.png" alt="LinkedIn Icon" class="social-icon">
-          </a>
-        </li>
-        <!-- GitHub -->
-        <li>
-          <a href="https://github.com/r4plh" title="GitHub" target="_blank">
-            <img src="assets/images/github.png" alt="GitHub Icon" class="social-icon">
-          </a>
-        </li>
-        <!-- Medium -->
-        <li>
-          <a href="https://medium.com/@amannagrawall002" title="Medium" target="_blank">
-            <img src="assets/images/medium.png" alt="Medium Icon" class="social-icon">
-          </a>
-        </li>
-        <!-- Twitter (X) -->
-        <li>
-          <a href="https://x.com/r4plh" title="Twitter" target="_blank">
-            <img src="assets/images/twitter.png" alt="Twitter Icon" class="social-icon">
-          </a>
-        </li>
-<!-- Resume -->
-<li>
-  <a href="https://drive.google.com/file/d/1gtZhXcE3C7jLm3WwrGQrCoeMkdxJ7Sg0/view?usp=sharing" 
-     title="Resume" 
-     target="_blank"
-     style="display: flex; align-items: center; text-decoration: none;"
-  >
-    <img src="assets/images/resume icon.png" alt="View My Resume" class="social-icon" style="margin-right: 8px;">
-    <span style="font-style: italic; font-size: 12px;">(View My Resume)</span>
-  </a>
-</li>
-</ul>
-</div>
-<!-- End Social/Contact Icons -->
+        <ul class="social-links">
+            <li>
+                <a href="https://www.linkedin.com/in/r4plh/" title="LinkedIn" target="_blank">
+                    <img src="assets/images/linkedin.png" alt="LinkedIn" class="social-icon">
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/r4plh" title="GitHub" target="_blank">
+                    <img src="assets/images/github.png" alt="GitHub" class="social-icon">
+                </a>
+            </li>
+            <li>
+                <a href="https://medium.com/@amannagrawall002" title="Medium" target="_blank">
+                    <img src="assets/images/medium.png" alt="Medium" class="social-icon">
+                </a>
+            </li>
+            <li>
+                <a href="https://x.com/r4plh" title="Twitter" target="_blank">
+                    <img src="assets/images/twitter.png" alt="Twitter" class="social-icon">
+                </a>
+            </li>
+            <li>
+                <a href="https://drive.google.com/file/d/1gtZhXcE3C7jLm3WwrGQrCoeMkdxJ7Sg0/view?usp=sharing" 
+                   title="Resume" target="_blank">
+                    <img src="assets/images/resume icon.png" alt="Resume" class="social-icon">
+                    <span>Resume</span>
+                </a>
+            </li>
+        </ul>
+    </div>
 
+    <!-- Logo -->
     <div class="logo">
         <img src="assets/images/logo.png" alt="r4plh Logo">
     </div>
-      
-    <section id="about">
-      <div class="container">
-        <h2 class="section-title">About ME</h2>
-        <div class="about-content">
-          <img src="assets/images/Picture 1.jpg" alt="Aman Agrawal" class="profile-img">
-          <div class="text-content">
-            <p>
-              Hi, I'm <strong>Aman Agrawal</strong>!<br><br>
-              I always have a lot to write, when it comes to machine learning and related stuff! 
-              Mostly you'll find me reading or sharing my learnings on topics related to AI. 
-              I like to think and solve problems via a First Principles thinking approach.
-              <br><br>
-              I have built projects in the field of NLP and GenAI. 
-              I have industry experience in the AI domain through my internships in the NLP and GenAI field. 
-              I believe in the concept of build-in-public, so you'll find me an active guy on platforms like 
-              <a href="https://medium.com/@amannagrawall002" target="_blank" style="text-decoration: underline;">Medium</a>, 
-              <a href="https://x.com/r4plh" target="_blank" style="text-decoration: underline;">Twitter</a>, 
-              and 
-              <a href="https://www.linkedin.com/in/r4plh/" target="_blank" style="text-decoration: underline;">LinkedIn</a> 
-              learning and sharing knowledge.
-              <br><br>
-              I write articles on topics related to Data Science, ML/AI on Medium. 
-              Please feel free to see my work here!
-              To connect via mail - <strong>amannagrawall002@gmail.com</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-      
-    <section id="experience">
-      <div class="container">
-        <h2 class="section-title">Experience</h2>
-        
-        <!-- Pascal AI Labs Experience -->
-        <div class="experience-item">
-          <img src="assets/images/download (7).jpeg" alt="Pascal AI Labs Logo" class="experience-logo">
-          <div class="experience-info">
-            <h3>Pascal AI Labs</h3>
-            <p class="tenure">May 2025 - Present</p>
-            <p><strong>Machine Learning Engineer Intern</strong></p>
-            <p>At Pascal AI Labs, I am developing a comprehensive LLM evaluation platform that enables finance domain experts to conduct efficient prompt experimentation and systematic analysis of LLM responses against internal golden datasets, significantly reducing their manual effort and saving considerable time. I have designed and built both the user interface and backend infrastructure, creating intuitive comparison tools that allow domain experts to easily evaluate LLM outputs against golden answers and historical experiments, enhancing team efficiency and collaboration. Additionally, I have assisted Pascal AI in benchmarking their fintech software against the industry-standard FinBench dataset to establish baseline performance metrics, and through research, analysis, and implementation of system enhancements, I have improved normal RAG accuracy by 11% and advanced RAG accuracy by 10%, contributing to the company's performance in the fintech AI space.</p>
-          </div>
-        </div>
-        
-        <!-- Job Twine Experience -->
-        <div class="experience-item">
-          <img src="assets/images/jobtwine_logo.jpeg" alt="Job Twine Logo" class="experience-logo">
-          <div class="experience-info">
-            <h3>Job Twine</h3>
-            <p class="tenure">Dec 2024 - March 2025</p>
-            <p><strong>Generative AI Intern</strong></p>
-            <p>As a Machine Learning Engineer Intern at JobTwine, I developed the Playbook feature, an intelligent interview creation tool that automates customized round and question generation using OpenAI APIs and LangChain. I built scalable APIs with a "min-to-max" approach, enabling users to create interviews from job titles to detailed specifications, improving customization by 60%. Leveraging RAG with PostgreSQL and Redis, I optimized skill retrieval and interview configuration management, reducing update times by 50%. Collaborating closely with the CTO, I refined product requirements and solved production issues, driving a 40% boost in user engagement and product quality (more details in resume above)</p>
-          </div>
-        </div>
-        
-        <!-- Suryavanshi Ventures Experience -->
-        <div class="experience-item">
-          <img src="assets/images/suryavanshi_ventures_logo.jpeg" alt="Suryavanshi Ventures Logo" class="experience-logo">
-          <div class="experience-info">
-            <h3>Suryavanshi Ventures</h3>
-            <p class="tenure">Jan 2024 - July 2024</p>
-            <p><strong>Artifical Intelligence Intern</strong></p>
-            <p>During my internship, I developed an AI-powered conversational training platform for 5-star hotel staff, designed to simulate realistic customer interactions and provide real-time feedback. The platform served as a training tool to enhance staff knowledge and professionalism across key hotel services like dining, rooms, and amenities etc. By leveraging openAI models, RAG-based search, and parallel processing, the system improved training accuracy by 50% and reduced latency by 30%, ensuring efficient and effective staff evaluation and development (more details in resume above)</p>
-          </div>
-        </div>
-      </div>
-    </section>
-        
-    <section id="projects">
-      <div class="container">
-        <h2 class="section-title">Projects</h2>
-        <div class="text-content">
-        </div>
-  
-        <!-- Projects List -->
-        <ul class="projects-list">
-          <!-- Project 1 -->
-          <li class="project-item">
-            <img 
-              src="assets/images/Website-ss.png" 
-              alt="Project 1 Thumbnail" 
-              class="project-thumb"
-            >
-            <div class="project-details">
-              <h3 class="project-title">GitHub Issues Semantic Search Engine</h3>
-              <p class="project-description">
-                I utilized the GitHub REST API to build a robust data pipeline, fetching and filtering issue and comment data to enhance relevance for semantic search. By selectively extracting comments with 15+ words and implementing efficient caching, I streamlined data retrieval and improved system performance (more details in resume above).
-                <a 
-                  href="https://github.com/r4plh/GISS" 
-                  target="_blank" 
-                  rel="noopener" 
-                  class="project-link"
-                >
-                  View Project
-                </a>
-              </p>
+
+    <!-- About Section -->
+    <section id="about" class="section" style="margin-top: 40px;">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <img src="assets/images/Picture 1.jpg" alt="Aman Agrawal" class="profile-img">
+                <div class="text-content">
+                    <p>
+                        Hi, I'm <strong>Aman Agrawal</strong>!<br><br>
+                        I always have a lot to write when it comes to machine learning and related topics! 
+                        You'll mostly find me reading or sharing my learnings on AI-related subjects. 
+                        I approach problems through a First Principles thinking methodology.
+                        <br><br>
+                        I have built projects in NLP and GenAI fields, with industry experience gained through 
+                        internships in these domains. I believe in the concept of building in public, so you'll 
+                        find me actively engaging on platforms like 
+                        <a href="https://medium.com/@amannagrawall002" target="_blank">Medium</a>, 
+                        <a href="https://x.com/r4plh" target="_blank">Twitter</a>, 
+                        and 
+                        <a href="https://www.linkedin.com/in/r4plh/" target="_blank">LinkedIn</a>, 
+                        constantly learning and sharing knowledge.
+                        <br><br>
+                        I write articles on Data Science and ML/AI topics on Medium. 
+                        Feel free to explore my work here!<br>
+                        Connect via email: <strong>amannagrawall002@gmail.com</strong>
+                    </p>
+                </div>
             </div>
-          </li>
-    
-          <!-- Project 2 -->
-          <li class="project-item">
-            <img 
-              src="assets/images/Screenshot 2025-02-23 at 5.46.37 PM.png" 
-              alt="Project 2 Thumbnail" 
-              class="project-thumb"
-            >
-            <div class="project-details">
-              <h3 class="project-title">Short Listing Agent</h3>
-              <p class="project-description">
-                I built a two-stage AI resume screening system combining NLP-based keyword/semantic search and a Vision Language Model (Gemini 1.5 Pro) to evaluate candidates. The system extracts and scores resumes based on job descriptions, identifies product-based experience, and summarizes years of relevant work, streamlining candidate evaluation with high accuracy and efficiency
-                <a 
-                  href="https://drive.google.com/drive/folders/1-lvaFAZ05qtuJvCoyvSmca_Mr27VMsOC?usp=sharing" 
-                  target="_blank" 
-                  rel="noopener" 
-                  class="project-link"
-                >
-                  View Project
-                </a>
-              </p>
-            </div>
-          </li>
-        </ul>
-        <!-- End Projects List -->
-      </div>
+        </div>
     </section>
 
-    <!-- Articles Section -->
-    <section id="articles">
-      <div class="container">
-        <h2 class="section-title">Articles</h2>
-        <div class="text-content">
-          <p>
-            I am passionate about writing and sharing knowledge through Medium articles, with over 15k views, and contribute as a writer to leading publications like Towards Data Science, Towards AI, and AI Advances. My work focuses on exploring and disseminating insights in data science, AI, and technology
-          </p>
+    <!-- Experience Section -->
+    <section id="experience" class="section">
+        <div class="container">
+            <h2 class="section-title">Experience</h2>
+            
+            <div class="experience-item">
+                <img src="assets/images/download (7).jpeg" alt="Pascal AI Labs Logo" class="experience-logo">
+                <div class="experience-info">
+                    <h3>Pascal AI Labs</h3>
+                    <p class="tenure">May 2025 - Present</p>
+                    <strong>Machine Learning Engineer Intern</strong>
+                    <p>Developed a comprehensive LLM evaluation platform enabling finance domain experts to conduct efficient prompt experimentation and systematic analysis. Built intuitive comparison tools and backend infrastructure, improving team efficiency and collaboration. Enhanced RAG accuracy by 11% for normal and 10% for advanced systems through research and implementation of system enhancements.</p>
+                </div>
+            </div>
+            
+            <div class="experience-item">
+                <img src="assets/images/jobtwine_logo.jpeg" alt="Job Twine Logo" class="experience-logo">
+                <div class="experience-info">
+                    <h3>Job Twine</h3>
+                    <p class="tenure">Dec 2024 - March 2025</p>
+                    <strong>Generative AI Intern</strong>
+                    <p>Developed the Playbook feature, an intelligent interview creation tool using OpenAI APIs and LangChain. Built scalable APIs with 60% improved customization. Leveraged RAG with PostgreSQL and Redis, reducing update times by 50%. Collaborated with CTO to drive 40% boost in user engagement and product quality.</p>
+                </div>
+            </div>
+            
+            <div class="experience-item">
+                <img src="assets/images/suryavanshi_ventures_logo.jpeg" alt="Suryavanshi Ventures Logo" class="experience-logo">
+                <div class="experience-info">
+                    <h3>Suryavanshi Ventures</h3>
+                    <p class="tenure">Jan 2024 - July 2024</p>
+                    <strong>Artificial Intelligence Intern</strong>
+                    <p>Developed an AI-powered conversational training platform for 5-star hotel staff, simulating realistic customer interactions with real-time feedback. Leveraged OpenAI models, RAG-based search, and parallel processing to improve training accuracy by 50% and reduce latency by 30%.</p>
+                </div>
+            </div>
         </div>
-
-        <!-- Publications Section -->
-        <section class="publications">
-          
-          <!-- Publication: Towards Data Science -->
-          <div class="publication">
-            <div class="publication-header">
-              <img 
-                src="assets/images/towards_data_science_logo.jpeg" 
-                alt="Towards Data Science Logo"
-              >
-              <h3>Towards Data Science</h3>
-            </div>
-            <div class="articles">
-              <article>
-                <a 
-                  href="https://medium.com/towards-data-science/bessels-correction-why-do-we-divide-by-n-1-instead-of-n-in-sample-variance-30b074503bd9" 
-                  target="_blank" 
-                  rel="noopener"
-                >
-                  <div class="article-box">
-                    <img 
-                      src="assets/images/articleTDS.jpg" 
-                      alt="Bessel's Correction" 
-                      class="article-image"
-                    >
-                    <div class="article-text">
-                      <h4 class="article-title">Bessel's Correction</h4>
-                      <p class="article-description">
-                        In statistics, understanding why we divide by n−1 for sample variance is crucial. 
-                        This method corrects for bias in estimating a population's variance from a sample. 
-                        <span class="read-more">Read more...</span>
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </article>
-            </div>
-          </div>
-          <!-- End of Publication: TDS -->
-
-          <!-- Publication: Towards AI -->
-          <div class="publication">
-            <div class="publication-header">
-              <img 
-                src="assets/images/towards_artificial_intelligence_logo.jpeg" 
-                alt="Towards AI Logo"
-              >
-              <h3>Towards AI</h3>
-            </div>
-            <div class="articles">
-              <article>
-                <a 
-                  href="https://medium.com/towards-artificial-intelligence/rag-research-paper-explained-retrieval-augmented-generation-for-knowledge-intensive-nlp-tasks-fe727c37cc19" 
-                  target="_blank" 
-                  rel="noopener"
-                >
-                  <div class="article-box">
-                    <img 
-                      src="assets/images/article2TAI.jpg" 
-                      alt="RAG for Knowledge-Intensive NLP Tasks" 
-                      class="article-image"
-                    >
-                    <div class="article-text">
-                      <h4 class="article-title">
-                        RAG for Knowledge-Intensive NLP Tasks explained
-                      </h4>
-                      <p class="article-description">
-                        Retrieval-Augmented Generation (RAG) enhances AI language models by integrating 
-                        retrieval into the generation process. Discover the mechanics behind RAG. 
-                        <span class="read-more">Read more...</span>
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </article>
-            </div>
-          </div>
-          <!-- End of Publication: TAI -->
-
-          <!-- Publication: More Articles -->
-          <div class="publication">
-            <div class="publication-header">
-              <img 
-                src="assets/images/download (4).jpeg" 
-                alt="Logo for More Articles"
-              >
-              <h3>More Articles</h3>
-            </div>
-            <div class="articles">
-              
-              <!-- Article 1: Maximum Likelihood Estimation -->
-              <article>
-                <a 
-                  href="https://medium.com/@amannagrawall002/maximum-likelihood-estimation-parameter-estimation-technique-machine-learning-f7acb3b6ca89" 
-                  target="_blank" 
-                  rel="noopener"
-                >
-                  <div class="article-box">
-                    <img 
-                      src="assets/images/MaximumLikehood.jpg" 
-                      alt="Maximum Likelihood Estimation" 
-                      class="article-image"
-                    >
-                    <div class="article-text">
-                      <h4 class="article-title">Maximum Likelihood Estimation</h4>
-                      <p class="article-description">
-                        Delve into the fundamental concept of MLE and learn how it serves 
-                        as a cornerstone in parameter estimation for various 
-                        machine learning algorithms.
-                        <span class="read-more">Read more...</span>
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </article>
-
-              <!-- Article 2: Gradient Descent Variations -->
-              <article>
-                <a 
-                  href="https://medium.com/@amannagrawall002/batch-vs-stochastic-vs-mini-batch-gradient-descent-techniques-7dfe6f963a6f" 
-                  target="_blank" 
-                  rel="noopener"
-                >
-                  <div class="article-box">
-                    <img 
-                      src="assets/images/gd.jpg" 
-                      alt="Gradient Descent Techniques" 
-                      class="article-image"
-                    >
-                    <div class="article-text">
-                      <h4 class="article-title">Gradient Descent: Batch, Stochastic, and Mini-Batch</h4>
-                      <p class="article-description">
-                        Before reading this, we should have some idea of what gradient descent is 
-                        along with basic mathematical knowledge of functions and derivatives...
-                        <span class="read-more">Read more...</span>
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </article>
-
-            </div>
-          </div>
-          <!-- End of More Articles -->
-
-        </section>
-        <!-- End of Publications Section -->
-      </div>
     </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section">
+        <div class="container">
+            <h2 class="section-title">Projects</h2>
+            
+            <ul class="projects-list">
+                <li class="project-item">
+                    <img src="assets/images/Website-ss.png" alt="Project 1 Thumbnail" class="project-thumb">
+                    <div class="project-details">
+                        <h3 class="project-title">GitHub Issues Semantic Search Engine</h3>
+                        <p class="project-description">
+                            Built a robust data pipeline using GitHub REST API, implementing efficient caching and semantic search capabilities. Enhanced system performance through selective data extraction and streamlined retrieval processes.
+                            <a href="https://github.com/r4plh/GISS" target="_blank" class="project-link">
+                                View Project →
+                            </a>
+                        </p>
+                    </div>
+                </li>
+
+                <!-- <li class="project-item">
+                    <img src="assets/images/Screenshot 2025-02-23 at 5.46.37 PM.png" alt="Project 2 Thumbnail" class="project-thumb">
+                    <div class="project-details">
+                        <h3 class="project-title">Short Listing Agent</h3>
+                        <p class="project-description">
+                            Developed a two-stage AI resume screening system combining NLP-based search and Vision Language Model (Gemini 1.5 Pro). Streamlined candidate evaluation with high accuracy through automated scoring and summarization.
+                            <a href="https://drive.google.com/drive/folders/1-lvaFAZ05qtuJvCoyvSmca_Mr27VMsOC?usp=sharing" target="_blank" class="project-link">
+                                View Project →
+                            </a>
+                        </p>
+                    </div>
+                </li> -->
+            </ul>
+        </div>
+    </section>
+
+            <!-- Articles Section -->
+    <section id="articles" class="section">
+        <div class="container">
+            <h2 class="section-title">Articles</h2>
+            <div style="margin-bottom: 25px;">
+                <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 20px;">
+                    I am passionate about writing and sharing knowledge through Medium articles, with over 15k views. 
+                    I contribute as a writer to leading publications like Towards Data Science, Towards AI, and AI Advances, 
+                    focusing on insights in data science, AI, and technology.
+                </p>
+            </div>
+
+            <!-- Towards Data Science -->
+            <div class="publication">
+                <div class="publication-header">
+                    <img src="assets/images/towards_data_science_logo.jpeg" alt="Towards Data Science Logo">
+                    <h3>Towards Data Science</h3>
+                </div>
+                <div class="articles">
+                    <article>
+                        <a href="https://medium.com/towards-data-science/bessels-correction-why-do-we-divide-by-n-1-instead-of-n-in-sample-variance-30b074503bd9" target="_blank">
+                            <div class="article-box">
+                                <img src="assets/images/articleTDS.jpg" alt="Bessel's Correction" class="article-image">
+                                <div class="article-text">
+                                    <h4 class="article-title">Bessel's Correction</h4>
+                                    <p class="article-description">
+                                        Understanding why we divide by n−1 for sample variance is crucial in statistics. 
+                                        This method corrects for bias in estimating population variance from samples.
+                                        <span class="read-more">Read more...</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Towards AI -->
+            <div class="publication">
+                <div class="publication-header">
+                    <img src="assets/images/towards_artificial_intelligence_logo.jpeg" alt="Towards AI Logo">
+                    <h3>Towards AI</h3>
+                </div>
+                <div class="articles">
+                    <article>
+                        <a href="https://medium.com/towards-artificial-intelligence/rag-research-paper-explained-retrieval-augmented-generation-for-knowledge-intensive-nlp-tasks-fe727c37cc19" target="_blank">
+                            <div class="article-box">
+                                <img src="assets/images/article2TAI.jpg" alt="RAG for Knowledge-Intensive NLP Tasks" class="article-image">
+                                <div class="article-text">
+                                    <h4 class="article-title">RAG for Knowledge-Intensive NLP Tasks</h4>
+                                    <p class="article-description">
+                                        Retrieval-Augmented Generation enhances AI language models by integrating retrieval 
+                                        into the generation process. Discover the mechanics behind RAG.
+                                        <span class="read-more">Read more...</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+            </div>
+
+            <!-- More Articles -->
+            <div class="publication">
+                <div class="publication-header">
+                    <img src="assets/images/download (4).jpeg" alt="Logo for More Articles">
+                    <h3>More Articles</h3>
+                </div>
+                <div class="articles">
+                    <article>
+                        <a href="https://medium.com/@amannagrawall002/maximum-likelihood-estimation-parameter-estimation-technique-machine-learning-f7acb3b6ca89" target="_blank">
+                            <div class="article-box">
+                                <img src="assets/images/MaximumLikehood.jpg" alt="Maximum Likelihood Estimation" class="article-image">
+                                <div class="article-text">
+                                    <h4 class="article-title">Maximum Likelihood Estimation</h4>
+                                    <p class="article-description">
+                                        Explore the fundamental concept of MLE and learn how it serves as a cornerstone 
+                                        in parameter estimation for various machine learning algorithms.
+                                        <span class="read-more">Read more...</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+
+                    <article>
+                        <a href="https://medium.com/@amannagrawall002/batch-vs-stochastic-vs-mini-batch-gradient-descent-techniques-7dfe6f963a6f" target="_blank">
+                            <div class="article-box">
+                                <img src="assets/images/gd.jpg" alt="Gradient Descent Techniques" class="article-image">
+                                <div class="article-text">
+                                    <h4 class="article-title">Gradient Descent Techniques</h4>
+                                    <p class="article-description">
+                                        Compare Batch, Stochastic, and Mini-Batch gradient descent approaches. 
+                                        Understanding these optimization techniques and their trade-offs.
+                                        <span class="read-more">Read more...</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Enhanced scroll behavior and intersection observer for animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced Intersection Observer with staggered animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all major sections
+            document.querySelectorAll('.experience-item, .project-item, .publication').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s ease-out';
+                observer.observe(el);
+            });
+
+            // Enhanced hover effects for interactive elements
+            document.querySelectorAll('.experience-item, .project-item, .article-box').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                    this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Parallax effect for background elements
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const speed = scrolled * 0.5;
+                document.documentElement.style.setProperty('--scroll-y', `${speed}px`);
+            });
+
+            // Enhanced social icon interactions
+            document.querySelectorAll('.social-icon').forEach(icon => {
+                icon.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.1) rotate(5deg)';
+                    this.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.3)) brightness(1.1)';
+                });
+                
+                icon.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1) rotate(0deg)';
+                    this.style.filter = 'grayscale(0.3)';
+                });
+            });
+
+            // Add typing effect to the main heading
+            const headings = document.querySelectorAll('.section-title');
+            headings.forEach(heading => {
+                const text = heading.textContent;
+                heading.textContent = '';
+                let index = 0;
+                
+                const headingObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const typeWriter = () => {
+                                if (index < text.length) {
+                                    heading.textContent += text.charAt(index);
+                                    index++;
+                                    setTimeout(typeWriter, 100);
+                                }
+                            };
+                            typeWriter();
+                            headingObserver.unobserve(heading);
+                        }
+                    });
+                });
+                
+                headingObserver.observe(heading);
+            });
+
+            // Add mouse trail effect
+            const createTrail = (e) => {
+                const trail = document.createElement('div');
+                trail.style.position = 'fixed';
+                trail.style.left = e.clientX + 'px';
+                trail.style.top = e.clientY + 'px';
+                trail.style.width = '6px';
+                trail.style.height = '6px';
+                trail.style.borderRadius = '50%';
+                trail.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+                trail.style.pointerEvents = 'none';
+                trail.style.zIndex = '9999';
+                trail.style.opacity = '0.6';
+                trail.style.transform = 'translate(-50%, -50%)';
+                trail.style.transition = 'all 0.5s ease-out';
+                
+                document.body.appendChild(trail);
+                
+                setTimeout(() => {
+                    trail.style.opacity = '0';
+                    trail.style.transform = 'translate(-50%, -50%) scale(0)';
+                }, 50);
+                
+                setTimeout(() => {
+                    if (trail.parentNode) {
+                        document.body.removeChild(trail);
+                    }
+                }, 550);
+            };
+
+            // Throttled mouse trail
+            let trailTimeout;
+            document.addEventListener('mousemove', (e) => {
+                if (!trailTimeout) {
+                    trailTimeout = setTimeout(() => {
+                        createTrail(e);
+                        trailTimeout = null;
+                    }, 50);
+                }
+            });
+
+            // Enhanced loading animation
+            window.addEventListener('load', () => {
+                document.body.style.opacity = '1';
+                document.body.style.transform = 'translateY(0)';
+            });
+
+            // Set initial loading state
+            document.body.style.opacity = '0';
+            document.body.style.transform = 'translateY(20px)';
+            document.body.style.transition = 'all 0.8s ease-out';
+        });
+    </script>
 </body>
 </html>
