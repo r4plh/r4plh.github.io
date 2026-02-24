@@ -7,48 +7,8 @@
     'use strict';
 
     /* --------------------------------------------------
-       1. TYPED TEXT EFFECT
+       1. (Hero tags — pure CSS, no JS needed)
     -------------------------------------------------- */
-    const typedOutput = document.getElementById('typed-output');
-    if (typedOutput) {
-        const phrases = [
-            'Research Scientist',
-            'Speech Enhancement',
-            'Audio Signal Processing',
-            'Distributed Training',
-            'LLM Systems'
-        ];
-        let phraseIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-
-        function typeLoop() {
-            const current = phrases[phraseIndex];
-
-            if (isDeleting) {
-                typedOutput.textContent = current.substring(0, charIndex - 1);
-                charIndex--;
-            } else {
-                typedOutput.textContent = current.substring(0, charIndex + 1);
-                charIndex++;
-            }
-
-            let delay = isDeleting ? 35 : 70;
-
-            if (!isDeleting && charIndex === current.length) {
-                delay = 2200;
-                isDeleting = true;
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                phraseIndex = (phraseIndex + 1) % phrases.length;
-                delay = 400;
-            }
-
-            setTimeout(typeLoop, delay);
-        }
-
-        setTimeout(typeLoop, 1200);
-    }
 
     /* --------------------------------------------------
        2. SCROLL REVEAL (IntersectionObserver)

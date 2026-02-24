@@ -318,32 +318,45 @@ img { display: block; max-width: 100%; }
     animation: fadeUp 0.6s var(--ease) forwards 0.2s;
 }
 
-.hero-title {
-    font-size: clamp(1.2rem, 3vw, 1.6rem);
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 24px;
-    min-height: 2em;
+.hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 28px;
     opacity: 0;
     animation: fadeUp 0.6s var(--ease) forwards 0.3s;
 }
 
-.title-gradient {
-    background: linear-gradient(135deg, var(--accent), #06b6d4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.typed-cursor {
+.hero-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.02em;
     color: var(--accent);
-    animation: blink 1s step-end infinite;
-    font-weight: 300;
+    border: 1px solid rgba(129, 140, 248, 0.25);
+    border-radius: 100px;
+    background: rgba(129, 140, 248, 0.06);
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+    animation: tagPop 0.5s var(--ease) forwards;
+    animation-delay: calc(0.5s + var(--i) * 0.12s);
+    transition: border-color 0.3s, background 0.3s, transform 0.3s;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+.hero-tag:hover {
+    border-color: rgba(129, 140, 248, 0.5);
+    background: rgba(129, 140, 248, 0.12);
+    transform: translateY(-2px);
+}
+
+@keyframes tagPop {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .hero-description {
@@ -351,9 +364,19 @@ img { display: block; max-width: 100%; }
     color: var(--text-secondary);
     line-height: 1.7;
     max-width: 520px;
-    margin: 0 auto 32px;
+    margin: 0 auto 16px;
     opacity: 0;
     animation: fadeUp 0.6s var(--ease) forwards 0.4s;
+}
+
+.hero-philosophy {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin: 0 auto 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s var(--ease) forwards 0.45s;
 }
 
 .hero-links {
