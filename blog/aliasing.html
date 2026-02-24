@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BB0R0PGQ15"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BB0R0PGQ15');</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding the Foundational Distortion of Digital Audio - From First Principles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --ink-light: #4a4540;
+    --ink-faint: #8a847e;
+    --paper: #f7f3ee;
+    --paper-dark: #ede8e0;
+    --accent: #c8440a;
+    --accent-light: #e8692a;
+    --accent-faint: #f5ddd0;
+    --green: #2d6a4f;
+    --code-bg: #1e1b18;
+    --code-text: #e8d5b0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 19px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ── HEADER ── */
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 80px 0 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .masthead::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200,68,10,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 50%, transparent 100%);
+  }
+
+  .masthead-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    color: var(--paper);
+  }
+
+  h1 em {
+    color: var(--accent-light);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    font-weight: 300;
+    color: rgba(247,243,238,0.65);
+    line-height: 1.6;
+    max-width: 600px;
+    font-style: italic;
+  }
+
+  .byline {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(247,243,238,0.12);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(247,243,238,0.4);
+    letter-spacing: 0.08em;
+  }
+
+  .byline a {
+    color: var(--accent-light);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(232,105,42,0.3);
+    transition: border-color 0.2s;
+  }
+
+  .byline a:hover {
+    border-bottom-color: var(--accent-light);
+  }
+
+  /* ── ARTICLE BODY ── */
+  article {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 72px 0 0;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── SECTION LABELS ── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--accent-faint);
+    max-width: 60px;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+
+  h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--ink);
+    margin: 40px 0 16px;
+  }
+
+  p {
+    margin-bottom: 24px;
+    color: var(--ink-light);
+    font-weight: 300;
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── DROPCAP ── */
+  .dropcap::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 5.2em;
+    font-weight: 900;
+    float: left;
+    line-height: 0.78;
+    margin: 8px 12px 0 0;
+    color: var(--accent);
+  }
+
+  /* ── PULLQUOTE ── */
+  .pullquote {
+    margin: 52px -24px;
+    padding: 36px 48px;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pullquote::before {
+    content: '\201C';
+    font-family: 'Playfair Display', serif;
+    font-size: 180px;
+    color: rgba(200,68,10,0.2);
+    position: absolute;
+    top: -30px; left: 20px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .pullquote p {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--paper);
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── MATH/DATA CALLOUT ── */
+  .data-box {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    background: white;
+    overflow: hidden;
+  }
+
+  .data-box-header {
+    background: var(--paper-dark);
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .data-box-body {
+    padding: 28px 24px;
+  }
+
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--paper-dark);
+    font-size: 15px;
+  }
+
+  .calc-row:last-child { border-bottom: none; }
+
+  .calc-label {
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-right: 16px;
+  }
+
+  .calc-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    text-align: right;
+  }
+
+  .calc-value.accent { color: var(--accent); font-weight: 600; }
+  .calc-value.green { color: var(--green); font-weight: 600; }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    margin: 40px 0;
+    padding: 28px 32px;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    position: relative;
+  }
+
+  .formula-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+  }
+
+  .formula-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.4);
+    margin-bottom: 14px;
+  }
+
+  .formula {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    font-style: italic;
+    color: var(--accent-light);
+    letter-spacing: 0.02em;
+  }
+
+  .formula sub {
+    font-size: 0.65em;
+    vertical-align: baseline;
+    position: relative;
+    top: 0.3em;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comparison {
+    margin: 44px 0;
+    overflow: hidden;
+    border: 1px solid var(--paper-dark);
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .comparison-row.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .comparison-row.header {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .comparison-row:not(.header):nth-child(even) { background: white; }
+  .comparison-row:not(.header):nth-child(odd) { background: var(--paper); }
+
+  .comparison-cell {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    border-right: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .comparison-cell:last-child { border-right: none; }
+  .comparison-row.header .comparison-cell {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.6);
+  }
+
+  .highlight-row .comparison-cell {
+    background: var(--accent-faint);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: var(--paper-dark);
+    padding: 2px 7px;
+    color: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    margin: 36px 0;
+    background: var(--code-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .code-block-header {
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(232,213,176,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .code-block pre {
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--code-text);
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+    border-radius: 0;
+  }
+
+  /* ── DEFINITION BOX ── */
+  .definition {
+    margin: 36px 0;
+    padding: 24px 28px 24px 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-faint);
+  }
+
+  .definition-term {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .definition p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--ink-light);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    margin: 60px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--paper-dark);
+  }
+
+  .divider-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+  }
+
+  /* ── IMAGE PLACEHOLDER ── */
+  .figure {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    background: white;
+    overflow: hidden;
+  }
+
+  .figure-placeholder {
+    background: var(--ink);
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+  }
+
+  .figure-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(200,68,10,0.04) 20px,
+      rgba(200,68,10,0.04) 40px
+    );
+    pointer-events: none;
+  }
+
+  .figure-placeholder-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(247,243,238,0.35);
+    text-align: center;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .figure-placeholder-text .icon {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  .figure-caption {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .figure-caption strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ── ANALOGY MAP ── */
+  .analogy-map {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    overflow: hidden;
+  }
+
+  .analogy-map-header {
+    background: var(--ink);
+    padding: 14px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.5);
+  }
+
+  .analogy-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--paper-dark);
+    background: white;
+    font-size: 15px;
+  }
+
+  .analogy-row:nth-child(even) { background: var(--paper); }
+  .analogy-row:last-child { border-bottom: none; }
+
+  .analogy-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 16px;
+    padding: 0 16px;
+  }
+
+  .analogy-left {
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .analogy-right {
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  /* ── BIG NUMBERS ── */
+  .big-numbers {
+    margin: 44px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-dark);
+  }
+
+  .big-num-cell {
+    background: white;
+    padding: 28px 24px;
+  }
+
+  .big-num-cell.dark {
+    background: var(--ink);
+  }
+
+  .big-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .big-num.accent { color: var(--accent); }
+  .big-num.green { color: var(--green); }
+  .big-num.paper { color: var(--paper); }
+
+  .big-num-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .big-num-cell.dark .big-num-label { color: rgba(247,243,238,0.4); }
+
+  /* ── CONTACT LINKS ── */
+  .contact-links {
+    margin: 36px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .contact-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid var(--accent-faint);
+    background: white;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .contact-link:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 100px;
+    padding: 52px 40px;
+    background: var(--ink);
+    color: rgba(247,243,238,0.4);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  footer strong {
+    color: var(--accent-light);
+    font-weight: 500;
+  }
+
+  /* ── SCROLL ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .masthead-inner > * {
+    animation: fadeUp 0.8s ease forwards;
+  }
+
+  .masthead-inner .tag { animation-delay: 0.1s; }
+  .masthead-inner h1 { animation-delay: 0.25s; }
+  .masthead-inner .subtitle { animation-delay: 0.4s; }
+  .masthead-inner .byline { animation-delay: 0.55s; }
+
+  .figure img {
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid var(--paper-dark);
+}
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    article { padding: 0 20px; }
+    .masthead-inner { padding: 0 20px; }
+    .pullquote { margin: 40px -20px; padding: 28px 28px; }
+    .big-numbers { grid-template-columns: 1fr; }
+    .comparison-cell { padding: 10px 12px; font-size: 11px; }
+    .analogy-row { grid-template-columns: 1fr; gap: 4px; }
+    .analogy-arrow { display: none; }
+    .formula { font-size: 20px; }
+    .contact-links { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="tag">Signal Processing · Audio · AI/ML · First Principles</div>
+    <h1>Understanding the Foundational <em>Distortion</em> of Digital Audio</h1>
+    <p class="subtitle">From first principles, with worked examples and visual intuition - why spinning wheels go backward, why cheap recordings sound harsh, and why it all traces back to one elegant rule.</p>
+    <div class="byline">By Aman Agrawal &nbsp;·&nbsp; <a href="https://x.com/r4plh">@r4plh</a> &nbsp;·&nbsp; A Deep Dive from Intuition to Math</div>
+  </div>
+</header>
+
+<article>
+
+  <!-- INTRO -->
+  <div class="section" id="s-intro">
+    <div class="section-label">Prologue</div>
+    <h2>Why This Article Exists</h2>
+
+    <p class="dropcap">Ever wondered why spinning wheels sometimes look like they're going backward in movies? Or why a cheap digital recording sounds harsh and metallic compared to the original sound? Both of these share the same root cause - aliasing. It's one of the most fundamental concepts in signal processing, and yet most of the explanations out there either oversimplify it ("just use 44.1 kHz and you'll be fine") or dump a wall of math without building any intuition behind this.</p>
+
+    <p>This article aims at covering aliasing from scratch : starting from the simplest visual analogy that anyone can understand, and then going deep into the math of how frequencies fold, why the Nyquist limit exists, how the DFT mirrors work, and what happens when you break the rules. If you work with audio in AI/ML pipelines (think MFCC preprocessing, SyncNet, speech models), there's a dedicated section towards the end connecting aliasing directly to the workflows. But first, let us build the foundation for understanding aliasing properly, believe me it's really easy to build the intuition behind this, the math used would just be a tool to justify the intuition.</p>
+
+    <p>I've spent a good amount of time working hands on with audio data preprocessing and model training, mostly dealing with speech data. So while this article builds everything from first principles, a lot of the intuition and practical observations here come from actually running into these things in real pipelines, not just textbook reading</p>
+
+    <p>This is going to be a detailed read, and it will give you a full picture of what aliasing is with first principles thinking, practical application where we see the effects of aliasing and there will also be deep math behind for those who gets turned on by seeing equations, Haha!!, and also with a promise that there will be no AI slop here, to generate all the media/images that is used for this post, Gemini Nano Banana Pro was used.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- WHAT IS ALIASING -->
+  <div class="section" id="s-what">
+    <div class="section-label">Part I</div>
+    <h2>What is Aliasing?</h2>
+
+    <p>Aliasing is a specific type of distortion that happens when we convert continuous analog signals into digital ones. It occurs when we don't sample fast enough to capture the signal's true behaviour. The word "Alias" literally means a false name or identity - in audio, a high frequency takes on the false identity of a lower frequency because it wasn't captured fast enough</p>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig1-false-identity.png" alt="False Identity - Reality vs Imposter" loading="lazy">
+      <div class="figure-caption"><strong>Figure 1:</strong> The Reality showing high frequency original vs The Imposter showing low frequency alias (Generated by Nano Gemini banana)</div>
+    </div>
+
+    <p>This is not just a blurry or noisy sound. It actually creates completely new, fake tones that were never part of the original recording. For example, a very high sound like 15 kHz can show up as a lower sound like 5 kHz. A bright cymbal shimmer can turn into a dull, muddy rumble. In simple words the high frequency hides itself and appears as a lower frequency - that's why it is called an alias, because the sound is pretending to be something else</p>
+
+    <div class="pullquote">
+      <p>The high frequency hides itself and appears as a lower frequency - that's why it is called an alias, because the sound is pretending to be something else.</p>
+    </div>
+
+    <p>Understanding why this happens requires understanding how digital systems capture sound in the first place, so let's start with the most intuitive visual analogy which is the famous Wagon Wheel Effect.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- WAGON WHEEL -->
+  <div class="section" id="s-wagon">
+    <div class="section-label">Part II</div>
+    <h2>The Wagon Wheel Effect: Why Fast Spinning Wheels Appear to Rotate Backward on Film</h2>
+
+    <p>Before we touch any math or audio waveforms, let's understand aliasing visually through the <strong>wagon wheel effect</strong>, something most of us have seen in movies.</p>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig2-wagon-wheel.png" alt="Wagon Wheel Effect" loading="lazy">
+      <div class="figure-caption"><strong>Figure 2:</strong> Frame 1 with spoke at 12 o'clock, Frame 2 with spoke at 11 o'clock, and What the brain sees diagram showing perceived backward motion (Generated by Google Nano banana)</div>
+    </div>
+
+    <p>Imagine a car wheel spinning forward very fast. A camera records this at a fixed speed, say 24 frames per second. Between two consecutive frames, the wheel spins almost a full circle moving from the 12 o'clock position all the way around to 11 o'clock (330° of rotation forward).</p>
+
+    <p>Now here's the key insight : our brain (and the math) is lazy. It assumes the object took the shortest path. Instead of seeing the long journey forward (330° clockwise), we perceive the spoke moving slightly backward from 12 to 11 (just 30° counter clockwise).</p>
+
+    <div class="data-box">
+      <div class="data-box-header">The Wagon Wheel Illusion - What Actually Happens</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Actual rotation</span>
+          <span class="calc-value">330° forward (clockwise)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">What the brain sees</span>
+          <span class="calc-value accent">30° backward (counter-clockwise)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Why</span>
+          <span class="calc-value">Brain assumes shortest path</span>
+        </div>
+      </div>
+    </div>
+
+    <p>The forward spinning wheel appears to rotate backward. This backward motion is the alias of the true motion : a false representation caused by insufficient sampling (the camera's frame rate was too slow to capture the actual speed of rotation).</p>
+
+    <div class="definition">
+      <div class="definition-term">The Core Principle</div>
+      <p>Just as a camera must shoot fast enough to capture a spinning wheel correctly, a digital audio system must sample fast enough to capture high frequency sounds. When it doesn't, those frequencies take on a false identity - they alias.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- ALIASING IN SOUND -->
+  <div class="section" id="s-sound">
+    <div class="section-label">Part III</div>
+    <h2>Aliasing in Sound: A Foundational Principle</h2>
+
+    <p>While the wagon wheel effect is just a cool visual trick in movies, in audio it is a disaster.</p>
+
+    <p>The fast spinning wheel corresponds to a high frequency sound wave, and the camera's frame rate corresponds to the audio sampling rate. The analogy maps perfectly:</p>
+
+    <div class="analogy-map">
+      <div class="analogy-map-header">Visual → Audio Analogy</div>
+      <div class="analogy-row">
+        <span class="analogy-left">Fast wheel spin</span>
+        <span class="analogy-arrow">→</span>
+        <span class="analogy-right">High frequency sound</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Camera frame rate</span>
+        <span class="analogy-arrow">→</span>
+        <span class="analogy-right">Audio sampling rate</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Apparent backward rotation</span>
+        <span class="analogy-arrow">→</span>
+        <span class="analogy-right">False lower frequency (the alias)</span>
+      </div>
+    </div>
+
+    <p>High frequencies are essential for clarity in audio - like the "s" and "t" sounds in speech, or the shimmer of cymbals. If we don't sample fast enough, these crisp sounds turn into low frequency noise artifacts. A cymbal crash contains frequencies up to 20,000 Hz. If sampled at only 30,000 Hz, frequencies above 15,000 Hz will alias down - turning bright, shimmering highs into muddy, unnatural rumbles.</p>
+
+    <p>This is why CD audio uses 44,100 Hz as its sampling rate - to safely capture frequencies up to 22,050 Hz, which covers the entire range of human hearing with some headroom</p>
+
+    <p>For those who are unaware of the Nyquist theorem, some words or lines may not make sense right now, and that's completely fine. Once you read the article till the end, everything will start to make sense. The Nyquist theorem is also explained later in connection with aliasing.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- NYQUIST THEOREM -->
+  <div class="section" id="s-nyquist">
+    <div class="section-label">Part IV</div>
+    <h2>The Solution: The Nyquist Shannon Sampling Theorem</h2>
+
+    <p>The rule to prevent aliasing is defined by the Nyquist Shannon Sampling Theorem, and it's non negotiable in digital audio.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">The Nyquist Shannon Sampling Theorem</div>
+      <div class="formula">f<sub>s</sub> &gt; 2 × f<sub>max</sub></div>
+    </div>
+
+    <p><strong>The sampling frequency (f_s) must be greater than twice the highest frequency present in the signal (f_max).</strong></p>
+
+    <p><strong>The "Why" behind the 2x rule:</strong> A sound wave is a cycle with a positive part (peak) and a negative part (trough). To define this cycle without ambiguity, you need to capture at least two samples per cycle - one to record the "up" motion and one to record the "down" motion. Anything less than 2 samples per cycle, and the system cannot distinguish between different frequencies - they become aliases of each other.</p>
+
+    <p>The frequency at exactly half the sampling rate is called the <strong>Nyquist frequency</strong> : it's the theoretical maximum frequency we can capture without information loss.</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Nyquist Frequency Examples</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Sampling rate: 44,100 Hz</span>
+          <span class="calc-value green">Nyquist = 22,050 Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Sampling rate: 48,000 Hz</span>
+          <span class="calc-value green">Nyquist = 24,000 Hz</span>
+        </div>
+      </div>
+    </div>
+
+    <p>Any frequency above the Nyquist limit will fold back and appear as a lower frequency - that's aliasing</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- CASE STUDY 1 -->
+  <div class="section" id="s-case1">
+    <div class="section-label">Part V - Case Study 1</div>
+    <h2>Undersampling - The 20 kHz / 15 kHz Example</h2>
+
+    <p>Let's see what happens when the Nyquist rule is broken with a concrete numerical example.</p>
+
+    <p><strong>Setup:</strong> Imagine a high frequency sound wave at 15,000 Hz (15 kHz). We sample it with a sampling rate of 20,000 Hz (20 kHz).</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Case Study 1 - Breaking the Nyquist Rule</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Signal frequency</span>
+          <span class="calc-value">15,000 Hz (15 kHz)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Sampling rate</span>
+          <span class="calc-value">20,000 Hz (20 kHz)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Nyquist frequency</span>
+          <span class="calc-value accent">10,000 Hz - VIOLATED</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Samples per cycle</span>
+          <span class="calc-value accent">~1.33× (need 2×)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Alias frequency</span>
+          <span class="calc-value accent">|15,000 − 20,000| = 5,000 Hz</span>
+        </div>
+      </div>
+    </div>
+
+    <p>The Nyquist frequency here is 20,000 / 2 = 10,000 Hz. Our signal at 15 kHz is above this limit : we're already violating the theorem.</p>
+
+    <p>The sampling frequency is 20,000 / 15,000 = ~1.33x the signal's frequency. This is faster than the signal, but less than the required 2x rate. Taking only 1.33 samples per cycle provides insufficient data. The system tries to reconstruct the wave by connecting these awkwardly spaced dots using the simplest, "shortest path" possible - just like the brain does with the wagon wheel.</p>
+
+    <p><strong>The Result:</strong> The original 15 kHz tone is lost. Instead, it is incorrectly recorded as a new, false 5 kHz tone.</p>
+
+    <div class="pullquote">
+      <p>This 5 kHz tone is the alias - an incorrect frequency that was never in the original sound. It's completely fake, and once it's there, it's permanent. You cannot filter it out because it now lives at a legitimate frequency.</p>
+    </div>
+
+    <p>That 5 kHz alias is indistinguishable from a real 5 kHz tone.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- CASE STUDY 2 -->
+  <div class="section" id="s-case2">
+    <div class="section-label">Part VI - Case Study 2</div>
+    <h2>Correct Sampling - The >30 kHz Example</h2>
+
+    <p>Now let's see how the Nyquist theorem solves the problem.</p>
+
+    <p><strong>Setup:</strong> Same 15 kHz sound wave. To obey the Nyquist theorem, we must sample at a rate greater than 2 × 15 kHz = 30 kHz. Let's use the CD standard of 44,100 Hz (44.1 kHz).</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Case Study 2 - Obeying the Nyquist Rule</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Signal frequency</span>
+          <span class="calc-value">15,000 Hz (15 kHz)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Sampling rate</span>
+          <span class="calc-value green">44,100 Hz (44.1 kHz)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Samples per cycle</span>
+          <span class="calc-value green">~2.94× (above 2× minimum)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Result</span>
+          <span class="calc-value green">Accurate 15 kHz - no alias</span>
+        </div>
+      </div>
+    </div>
+
+    <p>A sampling rate of 44.1 kHz provides ~2.94 samples per cycle (44,100 / 15,000), which is well above the 2x minimum. This is more than enough information to capture the wave's defining characteristics - its peak, trough, and the shape in between.</p>
+
+    <p><strong>The Result:</strong> The ambiguity is eliminated. There is only one unique 15 kHz wave that can fit through the captured sample points. The "shortest path" now correctly represents the original wave, and an accurate digital recording is made. No alias, no distortion, no fake frequencies.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- FOLDING GRAPH -->
+  <div class="section" id="s-folding">
+    <div class="section-label">Part VII</div>
+    <h2>Understanding the Folding Graph</h2>
+
+    <p>Now that we have the intuition, let's understand the most important visualisation in aliasing - the folding graph, that will start unfolding the mathematical understanding behind aliasing. This graph shows exactly what happens to every possible input frequency when it gets sampled at a given sampling rate.</p>
+
+    <h3>What Does This Graph Mean?</h3>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig3-folding-graph.png" alt="Folding Graph" loading="lazy">
+      <div class="figure-caption"><strong>Figure 3:</strong> Graph showing Original Frequency on x-axis, Reconstructed Frequency on y-axis, with zigzag pattern peaking at 500 Hz for f_s = 1 kHz (Generated by Google Nano Banana)</div>
+    </div>
+
+    <p>Let's take a concrete example where our sampling rate f_s = 1,000 Hz (1 kHz). This means our Nyquist frequency is f_s / 2 = 500 Hz.</p>
+
+    <div class="definition">
+      <div class="definition-term">Original Frequency (X-axis)</div>
+      <p>The true frequency of the analog signal in the real world - before any sampling occurs. This is what the sound or signal actually is.</p>
+    </div>
+
+    <div class="definition">
+      <div class="definition-term">Reconstructed Frequency (Y-axis)</div>
+      <p>The frequency that appears after sampling : what the digital system thinks the signal is.</p>
+    </div>
+
+    <p>In a perfect world, the reconstructed frequency would always equal the original frequency : we'd just see a straight diagonal line going up forever. But that's not what happens.</p>
+
+    <h3>The Folding Graph: Safe Zone vs Aliasing Zone</h3>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig4-folding-zones.png" alt="Folding Graph - Safe and Aliasing Zones" loading="lazy">
+      <div class="figure-caption"><strong>Figure 4:</strong> Folding graph showing diagonal line in Safe Zone (0-500 Hz), peak at Nyquist (500 Hz), and fold-back in Aliasing Zone (&gt;500 Hz), with f_s = 1000 Hz (Generated with Google Nano Banana)</div>
+    </div>
+
+    <p>This graph tells the whole story of aliasing in one picture. Let's break it down:</p>
+
+    <p><strong>The Diagonal (0 - 500 Hz) The Safe Zone:</strong> In the safe zone, input frequency equals output frequency perfectly. A 200 Hz signal reconstructs as 200 Hz, linear, predictable and faithful reproduction. Everything below the Nyquist frequency is captured correctly.</p>
+
+    <p><strong>The Peak (500 Hz) The Nyquist Frequency:</strong> This is exactly half the sampling rate. The theoretical maximum frequency we can capture without information loss.</p>
+
+    <p><strong>The Fold (> 500 Hz) The Aliasing Zone:</strong> This is where things break. Above the Nyquist frequency, frequencies don't continue ascending - they fold back. Higher inputs produce lower outputs. This is aliasing: the frequency spectrum reflecting like a mirror at the Nyquist boundary, this mirroring concept is important and have further application in plotting frequency domain graphs</p>
+
+    <p>The graph forms a zigzag pattern. The frequency goes up linearly to 500 Hz, then folds back down to 0, then back up to 500, and so on. Every frequency above Nyquist maps to some frequency below Nyquist - creating a false identity.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- WALKING THROUGH CASES -->
+  <div class="section" id="s-cases">
+    <div class="section-label">Part VIII</div>
+    <h2>Walking Through the Cases on the Folding Graph</h2>
+
+    <p>Let's walk through three specific cases on the folding graph with f_s = 1,000 Hz it will give crystal clear clarity.</p>
+
+    <h3>Case 1: Capturing f = 500 Hz (At the Nyquist Limit)</h3>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig5-500hz-case.png" alt="500 Hz at Nyquist Limit" loading="lazy">
+      <div class="figure-caption"><strong>Figure 5:</strong> Folding graph with 500 Hz circled on x-axis mapping to 500 Hz on y-axis, plus waveform showing 2 samples per cycle forming a triangle wave (Generated by Google Nano Banana)</div>
+    </div>
+
+    <p>At exactly f_s / 2, we capture one sample at each peak and one at each trough - the bare minimum to identify that an oscillation exists. This is what "minimum viable sampling" looks like.</p>
+
+    <p>The reconstruction forms a triangle wave, not a sine wave. We lose waveform fidelity, but critically we preserve the fundamental frequency. The system knows a 500 Hz signal is there, but it can't capture its exact shape. This is the edge case - technically the signal is captured, but just barely (extreme case)</p>
+
+    <p>On the folding graph, 500 Hz sits right at the peak. This is the Nyquist boundary - one foot in the safe zone, one foot in the aliasing zone.</p>
+
+    <h3>Case 2: Capturing f = 1,000 Hz (Signal Equals Sampling Rate)</h3>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig6-1000hz-case.png" alt="1000 Hz Signal Equals Sampling Rate" loading="lazy">
+      <div class="figure-caption"><strong>Figure 6:</strong> Folding graph with 1000 Hz circled on x-axis mapping to 0 Hz on y-axis, plus waveform showing all samples at the same phase position, resulting in a flat line at DC (Generated by Google Nano Banana)</div>
+    </div>
+
+    <p>When input frequency equals the sampling rate, we take exactly one sample per wave cycle. Each sample captures the same phase position, making the signal appear stationary - a flat line at DC (0 Hz).</p>
+
+    <p>On the folding graph, trace 1,000 Hz on the x-axis: it maps to 0 Hz on the y-axis. The original 1 kHz signal has been completely destroyed - it doesn't just alias to a wrong frequency, it disappears entirely into silence.</p>
+
+    <p>On the small triangle inset in the diagram, the red dot at 1 kHz on the x-axis sits right at the bottom (0 Hz) of the folding graph. The signal has been folded all the way back to zero.</p>
+
+    <h3>Case 3: Capturing f = 700 Hz (The Mirror Equation)</h3>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig7-700hz-case.png" alt="700 Hz Mirror Equation" loading="lazy">
+      <div class="figure-caption"><strong>Figure 7:</strong> Folding graph with 700 Hz circled mapping to 300 Hz, plus waveform showing original 700 Hz and reconstructed 300 Hz alias, plus mirror diagram showing reflection around Nyquist (Generated by Google Nano Banana)</div>
+    </div>
+
+    <p>This is the case where proper false signal we will see. 700 Hz is above our Nyquist frequency of 500 Hz, so aliasing occurs.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">The Mirror Equation</div>
+      <div class="formula">f<sub>alias</sub> = f<sub>s</sub> − f<sub>input</sub> = 1000 − 700 = 300 Hz</div>
+    </div>
+
+    <p>We can also think about it as: 700 Hz is 200 Hz above Nyquist (500 Hz), so the alias appears 200 Hz below.</p>
+
+    <p>The diagram on the right shows this beautifully : the original 700 Hz signal (in gray/blue) is sampled, and the reconstructed signal (in red) comes out as 300 Hz. The sample points are identical for both frequencies, the digital system cannot distinguish between them.</p>
+
+    <div class="data-box">
+      <div class="data-box-header">A Crucial Property</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">700 + 300</span>
+          <span class="calc-value accent">= 1000 = f_s</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Distance above Nyquist</span>
+          <span class="calc-value">700 − 500 = 200 Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Distance below Nyquist</span>
+          <span class="calc-value">500 − 300 = 200 Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Rule</span>
+          <span class="calc-value green">Equidistant from Nyquist - mirror symmetry</span>
+        </div>
+      </div>
+    </div>
+
+    <p>Any frequency and its alias always sum to the sampling rate. They are equidistant from the Nyquist frequency (500 Hz) - one sits 200 Hz above, the other 200 Hz below. The Nyquist frequency acts as the axis of symmetry, like a mirror.</p>
+
+    <p>Now from here in this article is the point where we dive deep in aliasing and its application in Fourier Transforms, people who knows the basics of DSP theory and Fourier Transform will have an edge in understanding the application of aliasing in frequency domain or Fourier Transform (In short Fourier Transform is the mathematical tool used to convert raw audio in time domain to frequency domain)</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- REAL WORLD SOUND -->
+  <div class="section" id="s-realworld">
+    <div class="section-label">Part IX</div>
+    <h2>Real World Sound: It's Never a Single Frequency</h2>
+
+    <p>Everything we've discussed so far uses clean, single frequency sine waves. But real world audio is never that simple.</p>
+
+    <p>According to Fourier's theorem, any complex sound can be understood as a combination of many sine waves, each with a different frequency and amplitude. A sound from an instrument, like a piano, is composed of:</p>
+
+    <div class="definition">
+      <div class="definition-term">The Fundamental Frequency</div>
+      <p>This is the lowest frequency that determines the pitch of the note we hear (for example, ~261 Hz for Middle C).</p>
+    </div>
+
+    <div class="definition">
+      <div class="definition-term">Harmonics (or Overtones)</div>
+      <p>These are a series of higher frequency sine waves that are multiples of the fundamental. The unique combination and loudness of these harmonics create the sound's distinctive timbre - this is why a violin playing Middle C sounds completely different from a flute playing the same note.</p>
+    </div>
+
+    <h3>The Nyquist Theorem's Focus: The Highest Frequency</h3>
+
+    <p>To accurately record a complex sound, we must capture not just its fundamental pitch but all the high frequency harmonics that give it richness and detail.</p>
+
+    <p>Therefore, the Nyquist theorem's rule is applied to the <strong>single highest frequency present in the sound mixture</strong>, not the fundamental.</p>
+
+    <p><strong>Example:</strong> A violin plays a note with a fundamental of 1,000 Hz. Its sound includes crucial harmonics that extend all the way up to 18,000 Hz. To capture the full, bright sound of the violin, the sampling rate must be: f_sampling > 2×18,000 Hz i.e f_sampling >36,000 Hz.</p>
+
+    <p>A standard rate like 44,100 Hz is used to safely capture the entire audible frequency range. If we chose a sampling rate that only satisfied the fundamental (say, anything above 2,000 Hz) all those harmonics above the Nyquist frequency would fold back and create aliases - the violin would sound distorted, metallic, and unnatural.</p>
+
+    <h3>Oversampling Lower Frequencies for High Fidelity</h3>
+
+    <p>A key consequence of this highest frequency rule is that all lower frequencies in the signal are massively oversampled, leading to an extremely high quality digital recording.</p>
+
+    <p><strong>If a sampling rate is fast enough to correctly capture the most rapid vibration, it is automatically more than sufficient for all slower vibrations.</strong></p>
+
+    <div class="data-box">
+      <div class="data-box-header">Oversampling at 44,100 Hz Sampling Rate</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Highest freq (20,000 Hz)</span>
+          <span class="calc-value green">~2.2× its frequency - safely meets Nyquist</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Fundamental (500 Hz)</span>
+          <span class="calc-value green">~88× its frequency - massive oversampling</span>
+        </div>
+      </div>
+    </div>
+
+    <p>This significant oversampling of the fundamental and midrange frequencies ensures they are captured with exceptional precision, resulting in a robust digital audio signal. The lower the frequency relative to the sampling rate, the more faithfully it's captured.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- DFT MIRROR -->
+  <div class="section" id="s-dft">
+    <div class="section-label">Part X</div>
+    <h2>The DFT Mirror and Redundancy: Why Half the Spectrum is a Ghost</h2>
+
+    <p>Now let's go deeper and understand aliasing from the perspective of the Discrete Fourier Transform (DFT), which is how we actually analyse frequencies in a digital signal. This section is important for anyone working with FFTs (Fast Fourier Transforms) in practice - whether in audio processing, speech analysis, or ML pipelines.</p>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig8-dft-nyquist.png" alt="DFT Magnitude Spectrum with Nyquist" loading="lazy">
+      <div class="figure-caption"><strong>Figure 8.1:</strong> DFT magnitude spectrum showing useful spectrum up to Nyquist (11,025 Hz) and redundant mirror/ghost copy above Nyquist, with conjugate symmetry formula X[k] = X*[N-k] (Generated by Google Nano Banana)</div>
+    </div>
+
+    <div class="figure">
+      <img src="aliasing-assets/fig9-dft-spectrum.png" alt="DFT Useful vs Redundant Spectrum" loading="lazy">
+      <div class="figure-caption"><strong>Figure 8.2:</strong> On the left of 11,025 Hz is the useful spectrum and to the right is redundant (Generated by Google Nano Banana)</div>
+    </div>
+
+    <p>The Discrete Fourier Transform produces N complex coefficients for N input samples. Due to the math of complex exponentials, the output is always conjugate symmetric for real-valued signals. This means:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Conjugate Symmetry</div>
+      <div class="formula">X[k] = X*[N−k]</div>
+    </div>
+
+    <p>Where X[k] is the DFT coefficient at bin k, and X*[N-k] is the complex conjugate of the coefficient at bin (N-k).</p>
+
+    <h3>What this means practically</h3>
+
+    <p>The Nyquist frequency (exactly f_s / 2) sits at bin index k = N/2. This is the axis of symmetry (the mirror). k = N/2 → F(N/2) = sr/2 = Nyquist Frequency.</p>
+
+    <p>Bins from N/2+1 to N−1 contain no new information. They're just reflections of bins 1 to N/2−1. The ghost half is a mathematical artifact, not real frequency content.</p>
+
+    <p>In the DFT magnitude spectrum diagram above (with f_s = 22,050 Hz as shown), everything to the right of the Nyquist boundary (11,025 Hz) is the redundant mirror : a ghost copy that adds no information. The frequency content is real and useful only up to the Nyquist frequency.</p>
+
+    <p><strong>In practice, we discard the right half.</strong> FFT libraries often provide an <code>rfft</code> (real FFT) function that returns only bins 0 to N/2, halving memory and computation. When you call <code>np.fft.rfft()</code> in Python or any equivalent, this is exactly what's happening - it gives you the useful half and throws away the ghost.</p>
+
+    <p>This is also why when you see frequency plots of audio signals, they typically only go up to the Nyquist frequency - because everything above it is either a mirror of what's below (in the DFT output) or an alias (if the signal wasn't properly band limited before sampling).</p>
+
+    <p>Also I would like to say here : From my personal experience working with speech data for model training - I've mostly dealt with human talking/speech audio, and honestly, I didn't feel much of a difference between 16 kHz, 24 kHz, and 48 kHz. Yes, as you increase the sampling rate, the speech does become a bit more enhanced, but it's minute - enough to spot a tiny difference if you're listening carefully, but nothing dramatic. For speech, 16 kHz captures pretty much everything that matters.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- AI/ML SECTION -->
+  <div class="section" id="s-ml">
+    <div class="section-label">Part XI</div>
+    <h2>Aliasing in AI/ML Audio Pipelines</h2>
+
+    <p>If you work with audio in machine learning - whether it's speech recognition, speaker verification, lip sync models like SyncNet and Wav2Lip, or any audio classification task - aliasing is not just a theoretical concept. It directly affects the quality of features you extract and therefore the performance of your model.</p>
+
+    <h3>MFCC Preprocessing and Aliasing</h3>
+
+    <p>MFCCs (Mel-Frequency Cepstral Coefficients) are the most common audio features used in ML pipelines. The MFCC pipeline works like this:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">The MFCC Pipeline</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Step 1</span>
+          <span class="calc-value">raw audio → pre emphasis</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 2</span>
+          <span class="calc-value">→ framing → windowing</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 3</span>
+          <span class="calc-value accent">→ FFT (aliasing matters here)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 4</span>
+          <span class="calc-value">→ Mel filter bank → DCT → MFCCs</span>
+        </div>
+      </div>
+    </div>
+
+    <p>The FFT step is where aliasing matters. If your input audio was recorded at a sampling rate that's too low for its frequency content, or if you downsample the audio before feature extraction without applying an anti aliasing filter first, those aliased frequencies will show up in your FFT output and pollute your Mel filter bank energies. The MFCC features you extract will contain phantom frequency information that wasn't in the original sound - and your model will learn from noise.</p>
+
+    <h3>SyncNet and Audio Preprocessing</h3>
+
+    <p>In the SyncNet article that I've written about before, the audio stream expects 0.2 seconds of audio which goes through preprocessing to produce a <strong>13 × 20 MFCC matrix</strong> (13 DCT coefficients × 20 time steps at 100 Hz MFCC frequency). This matrix is the input to the audio CNN stream.</p>
+
+    <p>If the audio fed into SyncNet's pipeline has aliasing effects - say, because someone downsampled from 48 kHz to 16 kHz without proper filtering - those things will be embedded in the MFCC features. The audio CNN will then learn correlations between these phantom frequencies and the video stream, degrading the model's ability to accurately measure audio-visual sync.</p>
+
+    <p>On things I have worked in audio, I would like to write some practical takeaways below</p>
+
+    <h3>Practical Takeaway for ML Engineers</h3>
+
+    <p>Whenever you're working with audio in an ML pipeline:</p>
+
+    <div class="definition">
+      <div class="definition-term">Always apply an anti-aliasing filter before downsampling</div>
+      <p>Libraries like librosa handle this internally when you use <code>librosa.resample()</code>, but if you're doing manual downsampling (like taking every Nth sample), you're introducing aliasing.</p>
+    </div>
+
+    <div class="definition">
+      <div class="definition-term">Be aware of the Nyquist frequency at your working sampling rate</div>
+      <p>If you're working at 16 kHz (common for speech), your Nyquist is 8 kHz - any speech content above 8 kHz is lost or aliased.</p>
+    </div>
+
+    <div class="definition">
+      <div class="definition-term">Higher sampling rates aren't always better for ML</div>
+      <p>44.1 kHz recording downsampled properly to 16 kHz will give cleaner features than a 44.1 kHz recording processed directly - because the model doesn't need information above 8 kHz for most speech tasks, and the extra frequency bins just add noise to the feature space</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-mark">· · ·</div></div>
+
+  <!-- CONCLUSION -->
+  <div class="section" id="s-conclusion">
+    <div class="section-label">Conclusion</div>
+    <h2>The Mirror That Breaks Everything</h2>
+
+    <p>Aliasing is one of those concepts that sits at the intersection of elegance and disaster. The math behind it is beautifully simple -frequencies fold around the Nyquist boundary like reflections in a mirror, and any frequency above half the sampling rate takes on the false identity of a lower frequency. But the consequences of not understanding it are harsh - permanent distortion, phantom frequencies, and corrupted signals that no amount of post-processing can fix.</p>
+
+    <p>We covered the full picture in this article: from the wagon wheel effect as a visual anchor, to the Nyquist Shannon theorem that defines the sampling rule, to the folding graph that shows exactly how every frequency maps after sampling, to the DFT mirror that explains the symmetry from a mathematical perspective. The thread connecting all of these is the same :</p>
+
+    <div class="pullquote">
+      <p>Sampling is a lossy process if done incorrectly, and aliasing is the specific way in which that information loss manifests.</p>
+    </div>
+
+    <p>Whether you're recording music, processing speech for an ML model, or building audio-visual sync systems - understanding aliasing at this depth gives you the foundation to make informed decisions about sampling rates, filter design, and feature extraction that will directly impact the quality of your output.</p>
+
+    <p>I would like to thank Google Nano banana pro to help me create those creative arts that I have used in the articles, and grammarly.</p>
+
+    <p>In the end, Thanks for the patience, feel free to ping to ask anything related here :</p>
+
+    <div class="contact-links">
+      <a class="contact-link" href="mailto:amannagrawall002@gmail.com">✉ Email</a>
+      <a class="contact-link" href="https://x.com/r4plh">𝕏 Twitter</a>
+      <a class="contact-link" href="https://github.com/r4plh">⌘ GitHub</a>
+      <a class="contact-link" href="https://www.linkedin.com/in/r4plh/">in LinkedIn</a>
+    </div>
+  </div>
+
+  <div style="height: 80px;"></div>
+
+</article>
+
+<footer>
+  <div style="font-size:14px; color: rgba(247,243,238,0.6); font-family: 'Playfair Display', serif; font-style:italic; margin-bottom: 12px;">
+    "Sampling is a lossy process if done incorrectly, and aliasing is the specific way in which that information loss manifests."
+  </div>
+  Written as a journey from <strong>first principles</strong> to <strong>foundational understanding</strong> &nbsp;·&nbsp; Signal Processing, Aliasing & AI/ML Audio
+</footer>
+
+<script>
+  // Intersection observer for scroll animations
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
