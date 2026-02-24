@@ -435,6 +435,31 @@ img { display: block; max-width: 100%; }
     font-size: 0.9rem;
 }
 
+/* Hero research hook */
+.hero-research-hook {
+    opacity: 0;
+    animation: fadeUp 0.6s var(--ease) forwards 0.45s;
+    margin-bottom: 28px;
+}
+
+.hero-research-hook a {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border: 1px dashed var(--accent-border);
+    border-radius: 999px;
+    transition: all 0.2s var(--ease);
+}
+
+.hero-research-hook a:hover {
+    background: var(--accent-dim);
+    border-style: solid;
+}
+
 /* Scroll indicator */
 .scroll-indicator {
     position: absolute;
@@ -681,6 +706,189 @@ img { display: block; max-width: 100%; }
     padding: 3px 10px;
     border-radius: 4px;
     border: 1px solid var(--border);
+}
+
+/* ==========================================================
+   RESEARCH
+   ========================================================== */
+.research-item {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: border-color 0.3s var(--ease);
+}
+
+.research-item:hover {
+    border-color: var(--border-hover);
+}
+
+.research-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.research-item-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.research-item-title i {
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.research-item-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 14px;
+    max-width: 700px;
+}
+
+.research-item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.research-item-tags span {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.03);
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.research-item-links {
+    flex-shrink: 0;
+}
+
+.btn-sm {
+    padding: 7px 16px;
+    font-size: 0.75rem;
+}
+
+/* PDF Viewer */
+.pdf-viewer {
+    margin-top: 4px;
+    background: #000;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+#pdf-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.pdf-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-top: 1px solid var(--border);
+}
+
+.pdf-page-info {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.pdf-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.pdf-btn {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+}
+
+.pdf-btn:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.pdf-btn-accent {
+    border-color: var(--accent-border);
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
+.pdf-btn-accent:hover {
+    background: rgba(129,140,248,0.2);
+    border-color: var(--accent);
+}
+
+.pdf-all-pages {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pdf-page-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Repo Tree */
+.repo-tree {
+    margin-top: 4px;
+    background: #0d0d0f;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.repo-tree-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.repo-tree-title i {
+    color: var(--accent);
+}
+
+.repo-tree-content {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    padding: 16px 20px;
+    margin: 0;
+    overflow-x: auto;
 }
 
 /* ==========================================================

@@ -56,7 +56,8 @@
             <ul class="nav-links">
                 <li><a href="#about">About</a></li>
                 <li><a href="#experience">Experience</a></li>
-                <li><a href="#research">Projects</a></li>
+                <li><a href="#deep-research">Research</a></li>
+                <li><a href="#projects">Projects</a></li>
                 <li><a href="#skills">Stack</a></li>
                 <li><a href="#writing">Writing</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -82,6 +83,9 @@
             <p class="hero-description">
                 Building speech enhancement systems and training models at scale.
                 IIT Roorkee. 25,000+ views on Medium.
+            </p>
+            <p class="hero-research-hook">
+                <a href="#deep-research"><i class="fa-solid fa-microscope"></i> I document everything I learn &mdash; from paper breakdowns to model internals. See my research.</a>
             </p>
             <div class="hero-links">
                 <a href="https://github.com/r4plh" target="_blank" rel="noopener" class="hero-link" aria-label="GitHub">
@@ -208,11 +212,123 @@
         </div>
     </section>
 
-    <!-- ========== PROJECTS SECTION ========== -->
-    <section id="research" class="section">
+    <!-- ========== RESEARCH SECTION ========== -->
+    <section id="deep-research" class="section">
         <div class="container">
             <h2 class="section-heading reveal">
                 <span class="heading-number">03</span>
+                <span class="heading-text">Research</span>
+            </h2>
+            <p class="section-subtitle reveal">
+                I go deep into the papers I study &mdash; custom diagrams, full pipeline breakdowns, and training analysis.
+            </p>
+
+            <!-- SyncNet Deep Dive -->
+            <div class="research-item reveal">
+                <div class="research-item-header">
+                    <div>
+                        <h3 class="research-item-title"><i class="fa-solid fa-file-pdf"></i> SyncNet: Audio-Visual Sync &mdash; Full Technical Breakdown</h3>
+                        <p class="research-item-desc">21-page deep dive into the SyncNet paper with custom diagrams, full inference pipeline walkthrough with exact tensor shapes, training analysis with W&amp;B logs, and dataloader bottleneck identification. From architecture to contrastive loss to confidence scores.</p>
+                        <div class="research-item-tags">
+                            <span>Audio-Visual Sync</span>
+                            <span>Contrastive Loss</span>
+                            <span>MFCC</span>
+                            <span>CNN</span>
+                            <span>W&amp;B</span>
+                        </div>
+                    </div>
+                    <div class="research-item-links">
+                        <a href="https://towardsdatascience.com/syncnet-paper-easily-explained/" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">TDS Article <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
+                </div>
+                <div class="pdf-viewer" id="pdf-viewer">
+                    <canvas id="pdf-canvas"></canvas>
+                    <div class="pdf-controls">
+                        <span class="pdf-page-info">Page <span id="pdf-page-num">1</span> of <span id="pdf-page-count">--</span></span>
+                        <div class="pdf-btns">
+                            <button id="pdf-prev" class="pdf-btn" aria-label="Previous page"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button id="pdf-next" class="pdf-btn" aria-label="Next page"><i class="fa-solid fa-chevron-right"></i></button>
+                            <button id="pdf-load-all" class="pdf-btn pdf-btn-accent">Load All Pages</button>
+                        </div>
+                    </div>
+                    <div id="pdf-all-pages" class="pdf-all-pages"></div>
+                </div>
+            </div>
+
+            <!-- videoEra Repo -->
+            <div class="research-item reveal" style="margin-top:32px;">
+                <div class="research-item-header">
+                    <div>
+                        <h3 class="research-item-title"><i class="fa-brands fa-github"></i> videoEra &mdash; Audio-Visual Research Knowledge Base</h3>
+                        <p class="research-item-desc">Structured repository covering audio fundamentals (sound physics, Fourier transforms, aliasing, reverb), paper breakdowns (HuBERT, Wav2Vec2, Whisper, SyncNet), Descript Audio Codec documentation, spectral &amp; time-domain analysis notebooks, and an audio model visualizer.</p>
+                        <div class="research-item-tags">
+                            <span>Fourier Transforms</span>
+                            <span>Spectral Analysis</span>
+                            <span>HuBERT</span>
+                            <span>Wav2Vec2</span>
+                            <span>Whisper</span>
+                            <span>DAC</span>
+                        </div>
+                    </div>
+                    <div class="research-item-links">
+                        <a href="https://github.com/r4plh/videoEra" target="_blank" rel="noopener" class="btn btn-ghost btn-sm"><i class="fa-brands fa-github"></i> View Repo</a>
+                    </div>
+                </div>
+                <div class="repo-tree">
+                    <div class="repo-tree-title"><i class="fa-solid fa-folder-tree"></i> Repository Structure</div>
+                    <pre class="repo-tree-content">videoEra/
+├── docs/
+│   ├── audio_fundamentals/
+│   │   ├── aliasing.md
+│   │   ├── fourier_intuition.md
+│   │   ├── sound_physics_and_perception.md
+│   │   └── sound_reverb.md
+│   ├── audio_codecs/
+│   │   ├── README.md
+│   │   └── descript_audio_codec.md
+│   └── papers/
+│       ├── hubert.pdf
+│       ├── syncnet.pdf
+│       ├── wav2vec2.pdf
+│       └── whisper.pdf
+├── notebooks/
+│   ├── spectral_analysis/
+│   └── time_domain/
+├── projects/
+│   ├── audio_model_visualizer/
+│   └── syncnet/
+└── tutorials/</pre>
+                </div>
+            </div>
+
+            <!-- Audio Preprocessing Notes -->
+            <div class="research-item reveal" style="margin-top:32px;">
+                <div class="research-item-header">
+                    <div>
+                        <h3 class="research-item-title"><i class="fa-solid fa-pen-ruler"></i> Audio Preprocessing Notes &mdash; Sound to Mel Spectrograms</h3>
+                        <p class="research-item-desc">76 pages of handwritten notes covering the full audio preprocessing pipeline from first principles &mdash; sound physics, sampling, Fourier transforms, STFT, filter banks, and mel spectrograms. Written while building deep domain expertise during research work at Invideo.</p>
+                        <div class="research-item-tags">
+                            <span>Handwritten</span>
+                            <span>76 Pages</span>
+                            <span>Mel Spectrograms</span>
+                            <span>STFT</span>
+                            <span>Filter Banks</span>
+                        </div>
+                    </div>
+                    <div class="research-item-links">
+                        <a href="https://drive.google.com/file/d/1kyGTvSwHMBcZZvMj2ZvdD7BpfGreprFp/view?usp=sharing" target="_blank" rel="noopener" class="btn btn-ghost btn-sm"><i class="fa-solid fa-file-pdf"></i> View Notes</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ========== PROJECTS SECTION ========== -->
+    <section id="projects" class="section">
+        <div class="container">
+            <h2 class="section-heading reveal">
+                <span class="heading-number">04</span>
                 <span class="heading-text">Projects</span>
             </h2>
             <div class="project-grid">
@@ -249,7 +365,7 @@
     <section id="skills" class="section">
         <div class="container">
             <h2 class="section-heading reveal">
-                <span class="heading-number">04</span>
+                <span class="heading-number">05</span>
                 <span class="heading-text">Tech Stack</span>
             </h2>
             <div class="stack-grid reveal">
@@ -315,7 +431,7 @@
     <section id="writing" class="section">
         <div class="container">
             <h2 class="section-heading reveal">
-                <span class="heading-number">05</span>
+                <span class="heading-number">06</span>
                 <span class="heading-text">Writing</span>
             </h2>
             <p class="section-subtitle reveal">
@@ -416,7 +532,7 @@
     <section id="achievements" class="section">
         <div class="container">
             <h2 class="section-heading reveal">
-                <span class="heading-number">06</span>
+                <span class="heading-number">07</span>
                 <span class="heading-text">Achievements</span>
             </h2>
             <div class="achievements-grid reveal">
@@ -442,7 +558,7 @@
     <section id="contact" class="section">
         <div class="container">
             <h2 class="section-heading reveal">
-                <span class="heading-number">07</span>
+                <span class="heading-number">08</span>
                 <span class="heading-text">Get In Touch</span>
             </h2>
             <div class="contact-content reveal">
@@ -475,6 +591,98 @@
     </footer>
 
     <!-- ========== SCRIPTS ========== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/script.js"></script>
+    <script>
+    (function() {
+        const url = 'assets/pdfs/syncnet-deep-dive.pdf';
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let pdfDoc = null, pageNum = 1, rendering = false;
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+        const pageNumEl = document.getElementById('pdf-page-num');
+        const pageCountEl = document.getElementById('pdf-page-count');
+        const allPagesEl = document.getElementById('pdf-all-pages');
+        let allLoaded = false;
+
+        function getScale() {
+            return window.innerWidth < 600 ? 1.0 : 1.5;
+        }
+
+        function renderPage(num) {
+            rendering = true;
+            pdfDoc.getPage(num).then(function(page) {
+                const scale = getScale();
+                const viewport = page.getViewport({ scale: scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function() {
+                    rendering = false;
+                    pageNumEl.textContent = num;
+                });
+            });
+        }
+
+        document.getElementById('pdf-prev').addEventListener('click', function() {
+            if (pageNum <= 1 || allLoaded) return;
+            pageNum--;
+            renderPage(pageNum);
+        });
+
+        document.getElementById('pdf-next').addEventListener('click', function() {
+            if (!pdfDoc || pageNum >= pdfDoc.numPages || allLoaded) return;
+            pageNum++;
+            renderPage(pageNum);
+        });
+
+        document.getElementById('pdf-load-all').addEventListener('click', function() {
+            if (allLoaded || !pdfDoc) return;
+            allLoaded = true;
+            canvas.style.display = 'none';
+            this.textContent = 'Loading...';
+            this.disabled = true;
+
+            const fragment = document.createDocumentFragment();
+            let loaded = 0;
+
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                (function(pageIndex) {
+                    pdfDoc.getPage(pageIndex).then(function(page) {
+                        const scale = getScale();
+                        const viewport = page.getViewport({ scale: scale });
+                        const c = document.createElement('canvas');
+                        c.className = 'pdf-page-canvas';
+                        c.width = viewport.width;
+                        c.height = viewport.height;
+                        c.setAttribute('data-page', pageIndex);
+                        page.render({ canvasContext: c.getContext('2d'), viewport: viewport }).promise.then(function() {
+                            loaded++;
+                            if (loaded === pdfDoc.numPages) {
+                                const sorted = Array.from(allPagesEl.children).sort(function(a, b) {
+                                    return parseInt(a.getAttribute('data-page')) - parseInt(b.getAttribute('data-page'));
+                                });
+                                allPagesEl.innerHTML = '';
+                                sorted.forEach(function(el) { allPagesEl.appendChild(el); });
+                                document.getElementById('pdf-load-all').style.display = 'none';
+                                document.getElementById('pdf-prev').style.display = 'none';
+                                document.getElementById('pdf-next').style.display = 'none';
+                                pageNumEl.parentElement.textContent = 'All ' + pdfDoc.numPages + ' pages loaded';
+                            }
+                        });
+                        allPagesEl.appendChild(c);
+                    });
+                })(i);
+            }
+        });
+
+        pdfjsLib.getDocument(url).promise.then(function(pdf) {
+            pdfDoc = pdf;
+            pageCountEl.textContent = pdf.numPages;
+            renderPage(1);
+        });
+    })();
+    </script>
 </body>
 </html>
