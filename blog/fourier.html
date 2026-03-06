@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BB0R0PGQ15"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BB0R0PGQ15');</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding the Fourier Transform: An Intuitive Approach to Sound Frequency Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --ink-light: #4a4540;
+    --ink-faint: #8a847e;
+    --paper: #f7f3ee;
+    --paper-dark: #ede8e0;
+    --accent: #c8440a;
+    --accent-light: #e8692a;
+    --accent-faint: #f5ddd0;
+    --green: #2d6a4f;
+    --code-bg: #1e1b18;
+    --code-text: #e8d5b0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 19px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ── HEADER / MASTHEAD ── */
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 80px 0 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .masthead::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200,68,10,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 50%, transparent 100%);
+  }
+
+  .masthead-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    color: var(--paper);
+  }
+
+  h1 em {
+    color: var(--accent-light);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    font-weight: 300;
+    color: rgba(247,243,238,0.65);
+    line-height: 1.6;
+    max-width: 600px;
+    font-style: italic;
+  }
+
+  .byline {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(247,243,238,0.12);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(247,243,238,0.4);
+    letter-spacing: 0.08em;
+  }
+
+  .byline a {
+    color: var(--accent-light);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(232,105,42,0.3);
+    transition: border-color 0.2s;
+  }
+
+  .byline a:hover {
+    border-bottom-color: var(--accent-light);
+  }
+
+  /* ── ARTICLE BODY ── */
+  article {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ── SECTIONS (scroll-reveal) ── */
+  .section {
+    padding: 72px 0 0;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── SECTION LABELS ── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--accent-faint);
+    max-width: 60px;
+  }
+
+  /* ── HEADINGS ── */
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+
+  h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--ink);
+    margin: 40px 0 16px;
+  }
+
+  /* ── PARAGRAPHS ── */
+  p {
+    margin-bottom: 24px;
+    color: var(--ink-light);
+    font-weight: 300;
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── DROPCAP ── */
+  .dropcap::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 5.2em;
+    font-weight: 900;
+    float: left;
+    line-height: 0.78;
+    margin: 8px 12px 0 0;
+    color: var(--accent);
+  }
+
+  /* ── PULLQUOTE ── */
+  .pullquote {
+    margin: 52px -24px;
+    padding: 36px 48px;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pullquote::before {
+    content: '\201C';
+    font-family: 'Playfair Display', serif;
+    font-size: 180px;
+    color: rgba(200,68,10,0.2);
+    position: absolute;
+    top: -30px; left: 20px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .pullquote p {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--paper);
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── DATA BOX (math/data callouts) ── */
+  .data-box {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    background: white;
+    overflow: hidden;
+  }
+
+  .data-box-header {
+    background: var(--paper-dark);
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .data-box-body {
+    padding: 28px 24px;
+  }
+
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--paper-dark);
+    font-size: 15px;
+  }
+
+  .calc-row:last-child { border-bottom: none; }
+
+  .calc-label {
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-right: 16px;
+  }
+
+  .calc-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    text-align: right;
+  }
+
+  .calc-value.accent { color: var(--accent); font-weight: 600; }
+  .calc-value.green { color: var(--green); font-weight: 600; }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    margin: 40px 0;
+    padding: 28px 32px;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    position: relative;
+  }
+
+  .formula-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+  }
+
+  .formula-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.4);
+    margin-bottom: 14px;
+  }
+
+  .formula {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    font-style: italic;
+    color: var(--accent-light);
+    letter-spacing: 0.02em;
+  }
+
+  .formula sub {
+    font-size: 0.65em;
+    vertical-align: baseline;
+    position: relative;
+    top: 0.3em;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comparison {
+    margin: 44px 0;
+    overflow: hidden;
+    border: 1px solid var(--paper-dark);
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .comparison-row.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .comparison-row.header {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .comparison-row:not(.header):nth-child(even) { background: white; }
+  .comparison-row:not(.header):nth-child(odd) { background: var(--paper); }
+
+  .comparison-cell {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    border-right: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .comparison-cell:last-child { border-right: none; }
+  .comparison-row.header .comparison-cell {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.6);
+  }
+
+  .highlight-row .comparison-cell {
+    background: var(--accent-faint);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: var(--paper-dark);
+    padding: 2px 7px;
+    color: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    margin: 36px 0;
+    background: var(--code-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .code-block-header {
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(232,213,176,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .code-block pre {
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--code-text);
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+    border-radius: 0;
+  }
+
+  /* ── DEFINITION BOX ── */
+  .definition {
+    margin: 36px 0;
+    padding: 24px 28px 24px 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-faint);
+  }
+
+  .definition-term {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .definition p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--ink-light);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    margin: 60px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--paper-dark);
+  }
+
+  .divider-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+  }
+
+  /* ── FIGURE (image with caption) ── */
+  .figure {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    background: white;
+    overflow: hidden;
+  }
+
+  .figure img {
+    width: 100%;
+    display: block;
+  }
+
+  .figure-placeholder {
+    background: var(--ink);
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+  }
+
+  .figure-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(200,68,10,0.04) 20px,
+      rgba(200,68,10,0.04) 40px
+    );
+    pointer-events: none;
+  }
+
+  .figure-placeholder-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(247,243,238,0.35);
+    text-align: center;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .figure-placeholder-text .icon {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  .figure-caption {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .figure-caption strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ── ANALOGY MAP ── */
+  .analogy-map {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    overflow: hidden;
+  }
+
+  .analogy-map-header {
+    background: var(--ink);
+    padding: 14px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.5);
+  }
+
+  .analogy-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--paper-dark);
+    background: white;
+    font-size: 15px;
+  }
+
+  .analogy-row:nth-child(even) { background: var(--paper); }
+  .analogy-row:last-child { border-bottom: none; }
+
+  .analogy-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 16px;
+    padding: 0 16px;
+  }
+
+  .analogy-left {
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .analogy-right {
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  /* ── BIG NUMBERS GRID ── */
+  .big-numbers {
+    margin: 44px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-dark);
+  }
+
+  .big-num-cell {
+    background: white;
+    padding: 28px 24px;
+  }
+
+  .big-num-cell.dark {
+    background: var(--ink);
+  }
+
+  .big-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .big-num.accent { color: var(--accent); }
+  .big-num.green { color: var(--green); }
+  .big-num.paper { color: var(--paper); }
+
+  .big-num-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .big-num-cell.dark .big-num-label { color: rgba(247,243,238,0.4); }
+
+  /* ── CONTACT LINKS ── */
+  .contact-links {
+    margin: 36px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .contact-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid var(--accent-faint);
+    background: white;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .contact-link:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 100px;
+    padding: 52px 40px;
+    background: var(--ink);
+    color: rgba(247,243,238,0.4);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  footer strong {
+    color: var(--accent-light);
+    font-weight: 500;
+  }
+
+  /* ── SCROLL ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .masthead-inner > * {
+    animation: fadeUp 0.8s ease forwards;
+  }
+
+  .masthead-inner .tag { animation-delay: 0.1s; }
+  .masthead-inner h1 { animation-delay: 0.25s; }
+  .masthead-inner .subtitle { animation-delay: 0.4s; }
+  .masthead-inner .byline { animation-delay: 0.55s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    article { padding: 0 20px; }
+    .masthead-inner { padding: 0 20px; }
+    .pullquote { margin: 40px -20px; padding: 28px 28px; }
+    .big-numbers { grid-template-columns: 1fr; }
+    .comparison-cell { padding: 10px 12px; font-size: 11px; }
+    .analogy-row { grid-template-columns: 1fr; gap: 4px; }
+    .analogy-arrow { display: none; }
+    .formula { font-size: 20px; }
+    .contact-links { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     MASTHEAD
+     ════════════════════════════════════════════ -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="tag">Signal Processing &middot; Fourier Transform &middot; Audio &middot; ML</div>
+    <h1>Understanding the <em>Fourier Transform</em></h1>
+    <p class="subtitle">Building the intuition behind how the Fourier Transform helps us get from time domain to frequency domain - not through heavy derivations, but by actually understanding what the math is doing and why it works.</p>
+    <div class="byline">By Aman Agrawal &nbsp;&middot;&nbsp; <a href="https://x.com/r4plh">@r4plh</a> &nbsp;&middot;&nbsp; A First Principles Deep Dive</div>
+  </div>
+</header>
+
+<article>
+
+  <!-- ════════════════════════════════════════
+       PROLOGUE — Why This Piece Exists
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-prologue">
+    <div class="section-label">Prologue</div>
+    <h2>Why This Piece Exists</h2>
+
+    <p class="dropcap">I am writing my understanding of the Fourier Transform, more like an intuition and what I understood from it and its application in sound frequency analysis. The purpose of this piece is to get the intuition of how the Fourier Transform helps us get to frequency domain features from time domain features - not getting into heavy maths and derivations, instead we'll try to simplify the meaning conveyed from the complex math equations.</p>
+
+    <p>Before we get into the Fourier Transform, you should have a basic understanding of how digital sound is stored - specifically sampling and quantization. Let me quickly cover it here so we're on the same page.</p>
+
+    <p>Sound in the real world is a continuous wave - air pressure changing smoothly over time. But computers can't store continuous things. They need numbers, discrete values. So to store sound digitally, we do two things.</p>
+
+    <div class="definition">
+      <div class="definition-term">Sampling</div>
+      <p>We take "snapshots" of the sound wave's amplitude at regular intervals. How many snapshots per second? That's the sampling rate. CD-quality audio takes 44,100 snapshots per second (44.1 kHz). For speech in ML pipelines, 16,000 per second (16 kHz) is common and that's mostly enough.</p>
+    </div>
+
+    <p>I have worked with 16kHz speech data extensively and honestly it captures pretty much everything that matters for speech. The key idea is that we're converting a smooth continuous wave into a series of discrete points in time.</p>
+
+    <div class="definition">
+      <div class="definition-term">Quantization</div>
+      <p>Each snapshot needs to record how loud the wave is at that moment, and with how much precision. This is the bit depth. With 16-bit audio, each amplitude value can be one of 65,536 possible levels (2&#185;&#8310;). That's more than enough for the human ear to not notice the difference from the original. With only 8-bit, you'd have just 256 levels - the audio would sound rough and grainy because the gap between the true amplitude and the closest storable value (this gap is called quantization error) becomes audible.</p>
+    </div>
+
+    <p>So after sampling and quantization, what we have is a sequence of numbers - amplitude values at evenly spaced time steps - stored in the computer. That's our time domain signal. That's g(t). And that's what the Fourier Transform takes as input.</p>
+
+    <p>I've spent a good amount of time working hands on with audio data preprocessing and model training, mostly dealing with speech data. So while this builds everything from first principles, a lot of what's written here comes from actually running into these things in real pipelines, not just textbook reading.</p>
+
+    <p>Also a promise - no AI slop here. Let's get into it.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART I — The Setup
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-setup">
+    <div class="section-label">Part I</div>
+    <h2>The Setup: What We're Starting With</h2>
+
+    <p>So basically, we have the original audio signal which, for complex sounds (including harmonic sounds too) like human voice or musical instruments and other kinds of sounds, are often made up of a combination of frequencies - constituent frequencies, or let's say a superposition of frequencies.</p>
+
+    <p>The continuous sound I'm talking about is in the time domain. It would basically be an amplitude vs. time graph. That is how the sampled points from the original sound are stored in the computer in the time domain in digital format.</p>
+
+    <p>Now, the Fourier Transform (FT) is the thing through which we get that graph to be converted from time domain (X-axis &rarr; Time, Y-axis &rarr; Amplitude) into a frequency domain one (X-axis &rarr; Frequency, Y-axis &rarr; Amplitude of contribution).</p>
+
+    <div class="figure">
+      <img src="fourier-assets/fig1-time-to-frequency.png" alt="Time domain to frequency domain conversion via Fourier Transform">
+      <div class="figure-caption"><strong>Figure 1:</strong> Time domain signal g(t) = sin(2&pi;&middot;300&middot;t) + sin(2&pi;&middot;700&middot;t) converted to frequency domain via FT, showing clear peaks at constituent frequencies 300 Hz and 700 Hz (Graph from Valerio Velardo - <em>Demystifying the Fourier Transform: The Intuition</em>)</div>
+    </div>
+
+    <p>If you've ever used <code>librosa.stft()</code> or <code>np.fft.rfft()</code> in your ML pipeline and wondered what's actually happening under the hood when you go from raw audio to a spectrogram - this is the thing. The Fourier Transform is the foundation underneath all of it.</p>
+
+    <p>Now we'll talk more on an intuition level about what's our aim and how we get what we want from the Fourier Transform. Let's try to understand in an organised way.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART II — Our Goal
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-goal">
+    <div class="section-label">Part II</div>
+    <h2>Our Goal</h2>
+
+    <p>To get the values of those frequencies, the combination of which the original sound is made of. By original sound, what is meant is the digital sound that we have stored through sampling points and quantization through ADC into our digital system. In easy language - to get the values of consituent frequencies from which the complex sound is made of.</p>
+
+    <div class="pullquote">
+      <p>It's analogous to having a bucket in which all colors are mixed and we want to segregate the constituent colors. The bucket mixed with colors is the original audio signal. The constituent colors are the constituent frequencies.</p>
+    </div>
+
+    <p>We want a graph which easily tells us which frequencies have what amplitude of contribution in making the original sound. So the x-axis of that graph should have all the frequency values and the y-axis should have the amplitude of contribution corresponding to each frequency. The frequencies that are actually present in the signal will show up as peaks. Everything else will be near zero.</p>
+
+    <div class="analogy-map">
+      <div class="analogy-map-header">FT Input &rarr; Output</div>
+      <div class="analogy-row">
+        <span class="analogy-left">Input</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Amplitude-Time graph</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Output</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Amplitude-Frequency graph</span>
+      </div>
+    </div>
+
+    <p>It's obvious, as the graphs sound so different, there would be mathematics involved, and to be honest, advanced tools of mathematics like the Fourier Transform and complex numbers are used to convert from our input (Time domain graph) &rarr; Output (Frequency domain graph). But to get the intuition of WHY the Fourier Transform does the job correctly, it's essential to understand WHAT the Fourier Transform does such that our goal is achieved. Then we'll get to know HOW it helps us achieve it at an intuition level.</p>
+
+    <p>So the <strong>WHAT</strong>, <strong>HOW</strong>, and the <strong>WHY</strong>?</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART III — The WHAT
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-what">
+    <div class="section-label">Part III</div>
+    <h2>The WHAT: What Does FT Actually Do?</h2>
+
+    <p>In answering the WHAT, we don't need to see what math is going on inside, we just want to know what input it takes and what output it gives. We will treat it like a black box.</p>
+
+    <p>So here's the thing - the input to FT is the entire original audio signal g(t), the complete time domain waveform. Now we evaluate FT at a specific frequency value f, and the output for that frequency f is a single complex number. This complex number is called the Fourier coefficient for frequency f.</p>
+
+    <p>Now the question is: WHAT is that complex number that FT outputs, right? Like, what do we get from it?</p>
+
+    <p>From this complex number, we extract two things:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Fourier Coefficient Output</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Magnitude</span>
+          <span class="calc-value accent">&radic;(Real&sup2; + Imaginary&sup2;)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">What it tells us</span>
+          <span class="calc-value">Amplitude of contribution of frequency f</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Phase</span>
+          <span class="calc-value accent">arctan(Imaginary / Real)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">What it tells us</span>
+          <span class="calc-value">Phase offset - where in its cycle that frequency starts</span>
+        </div>
+      </div>
+    </div>
+
+    <p><strong>Magnitude</strong> = &radic;(Real&sup2; + Imaginary&sup2;) - this tells us the amplitude of contribution of frequency f in the original signal. High magnitude means f is strongly present in the original audio. Low magnitude means it's barely there or not there at all.</p>
+
+    <p><strong>Phase</strong> = arctan(Imaginary / Real) - this tells us the phase offset of that frequency component. It tells us where in its cycle that frequency starts. We'll talk about phase properly later, don't worry about it right now, just know that this information also comes out of the same complex number.</p>
+
+    <p>So basically what happens is - we do this for every frequency we care about. For each f, we get one complex number, extract the magnitude, and plot it. The collection of all these (frequency, magnitude) pairs gives us the frequency domain graph. That's the WHAT.</p>
+
+    <p>Now let's see HOW that complex number actually comes - what's the mechanism inside FT that produces it?</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART IV — The HOW
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-how">
+    <div class="section-label">Part IV</div>
+    <h2>The HOW: How Does FT Compute This?</h2>
+
+    <p>So here's where things get really beautiful, believe me.</p>
+
+    <h3>The Winding Machine</h3>
+
+    <p>The core idea is that we wrap the original signal around a circle in the complex plane. The speed at which we wrap depends on the input frequency f.</p>
+
+    <p>Mathematically, for a given frequency f, we compute:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Winding Operation</div>
+      <div class="formula">g(t) &middot; e<sup>-2&pi;ift</sup></div>
+    </div>
+
+    <p>at every point in time t, and plot the result on the complex plane (real axis, imaginary axis). Now let's break this down, because it's essential to understand how to visualize and interpret what's happening here.</p>
+
+    <p>Here's an important thing to visualize: in the original g(t) graph, as time t increases, we are simply moving from left to right along the time axis - it's a straight line, we never come back. But in the complex plane, we are moving in a circle around the origin (0,0). So as time progresses, we keep coming back to the same angular positions - every time one full loop is completed, we start over from the same angle. The speed at which one full circle is completed depends on f: one full rotation happens when 2&pi;tf = 2&pi;, which means t&middot;f = 1, so it takes 1/f seconds to complete one loop. Higher f &rarr; faster looping. Lower f &rarr; slower looping.</p>
+
+    <div class="comparison">
+      <div class="comparison-row header two-col">
+        <div class="comparison-cell">Time Domain Graph</div>
+        <div class="comparison-cell">Complex Plane Graph</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">One-way journey left to right</div>
+        <div class="comparison-cell">Circular journey, keeps looping</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Never comes back</div>
+        <div class="comparison-cell">Returns to same angular positions</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">x-axis is time</div>
+        <div class="comparison-cell">Looping rate controlled by input f</div>
+      </div>
+    </div>
+
+    <p>Now you might think - since we keep coming back to the same angular positions, does the second loop trace the exact same path as the first? Like, in the time domain, each individual constituent frequency is a repeating sine wave, right? The 300 Hz component repeats every 1/300 seconds, the 700 Hz component repeats every 1/700 seconds. Each one individually has a clean repeating pattern. So when we wind g(t) around the complex plane, shouldn't the path from 0 to T (one period, T = 1/f) and from T to 2T be exactly the same? Shouldn't the loops overlap perfectly?</p>
+
+    <p>No. And this is a subtle but important thing to understand early.</p>
+
+    <p>The individual constituent frequencies inside g(t) do repeat - yes. But g(t) itself is not a single frequency. It's a superposition of multiple frequencies mixed together. Even though the angular position in the complex plane resets every 1/f seconds (the e<sup>-2&pi;ift</sup> part completes one full loop), the distance from origin - which is g(t) - is different at time t versus time t + 1/f. That's because g(t) has other frequency components in it that don't repeat at the same rate as f. So the value of g(t) at the same angular position changes from one loop to the next.</p>
+
+    <p>Each loop traces a slightly different path in the complex plane. This is why later when we compute the Centre of Mass, we compute it over the entire path for the full duration - not just one loop. If g(t) happened to be a single pure sine wave at exactly frequency f and nothing else, then yes - every loop would be identical. But for any real-world signal with multiple frequencies, each loop is different, and we need to consider all of them.</p>
+
+    <p>Keep this in mind, it'll make more sense once we get to the COM section below.</p>
+
+    <p>At any particular time t:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">What Each Part Represents</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">g(t)</span>
+          <span class="calc-value">Amplitude at time t = distance from origin</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">e<sup>-2&pi;ift</sup></span>
+          <span class="calc-value">Angle of (-2&pi;tf) radians, clockwise</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Result</span>
+          <span class="calc-value accent">Point at distance g(t), angle 2&pi;tf</span>
+        </div>
+      </div>
+    </div>
+
+    <p>As time progresses, the angle keeps rotating (because t increases), and the distance from origin keeps changing (because g(t) changes with the audio signal). The result is a path - a curve in the complex plane.</p>
+
+    <p>So how we can interpret this thing is that we are wrapping or winding the original sound signal g(t) around a circle, and the speed of winding and wrapping depends upon the input frequency f. Higher f means the curve wraps around faster. Lower f means slower wrapping. One full circle is completed when t&middot;f = 1, so the time period of one full rotation is 1/f.</p>
+
+    <p>To visualize how this winding happens at different frequencies, see this video, it will show the complex graph shape in the complex plane at different frequencies &rarr; <strong>3Blue1Brown - But what is the Fourier Transform?</strong>. Genuinely one of the best resources out there for this.</p>
+
+    <h3>The Centre of Mass (COM)</h3>
+
+    <p>Now here's where the magic happens. Once we have this wound-up curve in the complex plane, we calculate its Centre of Mass (COM).</p>
+
+    <p>Think of the wound-up curve as if it has uniform mass density, like a wire. The COM is the single point that represents the average position of the entire curve. We want the coordinates (Real, Imaginary) of this COM. Now how do we actually calculate this? Lets see.</p>
+
+    <p>Now our original sound g(t), as it is a digitally stored signal in a computer, it won't be continuous - we would have sampled points of the original sound. The corresponding same sampled points would be there on the complex plane too after applying g(t)&middot;e<sup>-2&pi;ift</sup>. The more sampled points there are in the original audio, the more corresponding points there would be on the complex plane. It's an obvious thing.</p>
+
+    <p>A quick note before the formulas: what we've been discussing so far - the winding, the circular motion, the COM - all of that is the same whether we're talking about the continuous version (with integrals) or the discrete version (with summations). The core concept of what the Fourier Transform does doesn't change. So don't get confused when you see a summation (&Sigma;) in one formula and an integral (&int;) in another - they're doing the same thing conceptually. Summation is for our finite sampled points, integral is for the theoretical continuous case. For building intuition, you can think of either one - the idea is identical. Just different tools for the same job.</p>
+
+    <p>So for our discrete digital signal with N sampled points, the COM coordinates are:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Discrete COM (DFT)</div>
+      <div class="formula">COM = (1/N) &Sigma; g(t<sub>n</sub>) &middot; e<sup>-2&pi;it<sub>n</sub>f</sup></div>
+    </div>
+
+    <p>This is the discrete version - and this is exactly what's happening when you call <code>np.fft.rfft()</code> or <code>np.fft.fft()</code> in Python. It's computing this winding + COM calculation for all frequencies at once. That one function call is doing this entire process across every frequency bin simultaneously.</p>
+
+    <p>Now just imagine if this is not done digitally. In that case, we don't need sampled points and we can work on a continuous function. That means we will have infinite continuous points of original audio and corresponding infinite points on the complex plane. Instead of summation, we can integrate:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Continuous Fourier Transform</div>
+      <div class="formula">g&#770;(f) = &int; g(t) &middot; e<sup>-2&pi;ift</sup> dt</div>
+    </div>
+
+    <p>Integration over limits &rarr; t&#8321; and t&#8322; (time duration of original sound), integration over &rarr; g(t)&middot;e<sup>-2&pi;ift</sup>, and the output is the complex Fourier coefficient for that frequency f. This is the continuous Fourier Transform formula. In practice we always work with the discrete version since we're dealing with digital audio, but the continuous form is good to know because it shows the same idea without the distraction of indices and array lengths.</p>
+
+    <p>One thing worth noting - the limits t&#8321; and t&#8322; matter. The final COM you get actually depends on how much of the signal you're including. A different time segment could give a different COM for the same frequency. For this article, we're applying FT to the full signal, so t&#8321; and t&#8322; are simply the start and end of our entire audio. But when you later get into STFT (Short-Time Fourier Transform), you'll see that deliberately choosing short time segments and applying FT to each one is exactly the idea - and that's where window size becomes a design decision.</p>
+
+    <p>Now when we get the COM coordinates, we calculate its distance from the origin:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Magnitude (Amplitude of Contribution)</div>
+      <div class="formula">Magnitude = &radic;(Real&sup2; + Imaginary&sup2;)</div>
+    </div>
+
+    <p>This magnitude is the amplitude of contribution of frequency f in the original audio signal. That's what gets plotted as the y-value for this frequency in the frequency domain graph.</p>
+
+    <p>The intuition for what this magnitude means: if the COM is at a significant distance from the origin, that frequency has a strong contribution in the original signal. If the COM is sitting near or around the origin, that frequency is barely present or not present at all. The distance from origin is directly telling us how much that frequency matters.</p>
+
+    <p>And remember what we discussed earlier about the loops not overlapping - this is where it pays off. The COM averages over all those slightly different loops, and that averaging is what makes the non-matching frequencies cancel out (their contributions point in different directions across loops and sum to near zero) while the matching frequencies pile up (their contributions consistently point in the same direction across loops).</p>
+
+    <h3>Why COM Works: The Key Insight</h3>
+
+    <p>This is the part that makes the whole thing click. Read this carefully.</p>
+
+    <p>When the winding frequency f matches a constituent frequency of the signal, something special happens. The wound-up curve becomes lopsided - the points pile up on one side of the complex plane. The COM lands far from the origin. High magnitude. We detect that frequency.</p>
+
+    <div class="figure">
+      <img src="fourier-assets/fig3-lopsided-com.png" alt="Lopsided winding in complex plane when frequency matches - COM far from origin">
+      <div class="figure-caption"><strong>Figure 2:</strong> When the winding frequency matches a constituent frequency (300 Hz, 700 Hz), the wound-up curve becomes lopsided - points pile up on one side. The COM Vector (pink arrow) points far from origin, indicating high magnitude</div>
+    </div>
+
+    <p>When f does NOT match any constituent frequency, the wound-up curve distributes roughly evenly around the origin. Points on one side get cancelled out by points on the opposite side. The COM lands near the origin. Low magnitude. That frequency isn't really present.</p>
+
+    <div class="figure">
+      <img src="fourier-assets/fig4-balanced-winding.png" alt="Balanced winding in complex plane at f=500 Hz - COM near origin">
+      <div class="figure-caption"><strong>Figure 3:</strong> FT at f = 500 Hz (not a constituent frequency). The wound-up curve distributes roughly evenly around the origin. The COM Vector (tiny pink arrow near center) is very close to origin - magnitude near zero</div>
+    </div>
+
+    <div class="pullquote">
+      <p>Match &rarr; lopsided &rarr; COM far from origin &rarr; peak in frequency domain. No match &rarr; balanced &rarr; COM near origin &rarr; flat in frequency domain.</p>
+    </div>
+
+    <p>That's it. That's how the Fourier Transform figures out what frequencies are inside the original signal.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART V — Worked Example
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-example">
+    <div class="section-label">Part V</div>
+    <h2>Worked Example: Walking Through the Numbers</h2>
+
+    <p>Alright let's make this concrete with actual numbers now. This is where the intuition becomes rock solid, trust me on this one.</p>
+
+    <p><strong>Setup:</strong> Suppose our original audio signal is:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Test Signal</div>
+      <div class="formula">g(t) = sin(2&pi;&middot;300&middot;t) + sin(2&pi;&middot;700&middot;t)</div>
+    </div>
+
+    <p>So this is a signal made up of exactly two frequencies: 300 Hz and 700 Hz. In the real world, this might sound like two pure tones playing simultaneously. We know the answer already - the frequency domain graph should show peaks at 300 and 700, and nothing else. Let's see if FT gets it right.</p>
+
+    <div class="figure">
+      <img src="fourier-assets/fig2-signal-superposition.png" alt="Superposition of 300 Hz and 700 Hz sine waves forming g(t)">
+      <div class="figure-caption"><strong>Figure 4:</strong> The time domain signal g(t) = sin(2&pi;&middot;300&middot;t) + sin(2&pi;&middot;700&middot;t) showing the superposition of two frequencies - the 300 Hz component (red), 700 Hz component (blue), and the combined signal g(t) (yellow)</div>
+    </div>
+
+    <p>We apply the Fourier Transform at three frequencies: f = 300 Hz, f = 700 Hz, and f = 500 Hz.</p>
+
+    <h3>FT at f = 300 Hz (a constituent frequency)</h3>
+
+    <p>We wind g(t) around the complex plane at 300 rotations per second.</p>
+
+    <p>Now think about what happens - the 300 Hz component of g(t) is rotating at the exact same speed as our winding. Because of this, the 300 Hz part of the signal consistently lands on the same side of the complex plane. It doesn't cancel itself out. The wound-up curve becomes heavily lopsided in one direction.</p>
+
+    <p>What about the 700 Hz component? It's rotating at a different speed than our 300 Hz winding. Over time, it traces out a roughly symmetric path around the origin and averages out to near zero. It doesn't contribute to the lopsidedness.</p>
+
+    <p>Result: COM is far from origin. Magnitude is high. The frequency domain graph gets a tall peak at f = 300 Hz. Correct - 300 Hz is indeed a constituent frequency.</p>
+
+    <h3>FT at f = 700 Hz (the other constituent frequency)</h3>
+
+    <p>Same logic, just reversed. Now the 700 Hz component of g(t) matches the winding speed, so it piles up on one side. The 300 Hz component, being at a different speed, averages out.</p>
+
+    <p>Result: COM is far from origin. High magnitude. Tall peak at f = 700 Hz. Correct again.</p>
+
+    <h3>FT at f = 500 Hz (NOT a constituent frequency)</h3>
+
+    <p>We wind g(t) at 500 rotations per second. Now here's the thing - neither the 300 Hz component nor the 700 Hz component matches this winding speed. Both of them trace roughly symmetric paths around the origin in the complex plane. Nothing piles up consistently on one side. Everything just cancels out, the curve is pretty much centered around origin.</p>
+
+    <p>Result: COM is very close to the origin. Magnitude is near zero. The frequency domain graph is flat at f = 500 Hz - correctly telling us this frequency is not present in the signal.</p>
+
+    <div class="comparison">
+      <div class="comparison-row header">
+        <div class="comparison-cell">Test Frequency</div>
+        <div class="comparison-cell">COM Position</div>
+        <div class="comparison-cell">Result</div>
+      </div>
+      <div class="comparison-row highlight-row">
+        <div class="comparison-cell">f = 300 Hz</div>
+        <div class="comparison-cell">Far from origin</div>
+        <div class="comparison-cell">Peak (constituent)</div>
+      </div>
+      <div class="comparison-row highlight-row">
+        <div class="comparison-cell">f = 700 Hz</div>
+        <div class="comparison-cell">Far from origin</div>
+        <div class="comparison-cell">Peak (constituent)</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-cell">f = 500 Hz</div>
+        <div class="comparison-cell">Near origin</div>
+        <div class="comparison-cell">Flat (not present)</div>
+      </div>
+    </div>
+
+    <h3>The Frequency Domain Graph</h3>
+
+    <p>After doing this for all frequencies, our frequency domain graph would show exactly two sharp peaks - one at 300 Hz and one at 700 Hz - with everything else near zero. We have successfully decomposed g(t) into its constituent frequencies. That's the Fourier Transform doing its job.</p>
+
+    <p>The color bucket analogy holds perfectly: we had a mixture (300 Hz + 700 Hz mixed together in the time domain), and the Fourier Transform segregated the constituent colors.</p>
+
+    <h3>Seeing It in Code</h3>
+
+    <p>For those who want to see this thing working in Python - here's the worked example in actual code, it's literally a few lines:</p>
+
+    <div class="code-block">
+      <div class="code-block-header">Python</div>
+      <pre><code>import numpy as np
+
+# Create the signal: 300 Hz + 700 Hz
+sr = 8000  # sampling rate
+t = np.linspace(0, 1, sr, endpoint=False)  # 1 second of audio
+g = np.sin(2 * np.pi * 300 * t) + np.sin(2 * np.pi * 700 * t)
+
+# Apply Fourier Transform - this is doing the winding + COM for all frequencies at once
+fft_result = np.fft.rfft(g)
+
+# Get magnitudes (amplitude of contribution for each frequency)
+magnitudes = np.abs(fft_result)
+
+# Get the frequency values corresponding to each bin
+freqs = np.fft.rfftfreq(len(g), d=1/sr)
+
+# The peaks in magnitudes will be at 300 Hz and 700 Hz
+# Everything else will be near zero</code></pre>
+    </div>
+
+    <p>That's it. <code>np.fft.rfft(g)</code> is doing the entire winding + COM process we discussed above - for every frequency bin simultaneously. The <code>np.abs()</code> extracts the magnitude (distance of COM from origin), and the <code>np.angle()</code> would give you the phase offset if you needed it. The <code>rfft</code> specifically gives you only the useful half of the spectrum (up to the Nyquist frequency) since the other half is a mirror - if you've read the aliasing article, you know why.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART VI — Phase
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-phase">
+    <div class="section-label">Part VI</div>
+    <h2>Phase: The Hidden Variable</h2>
+
+    <p>Now let's talk about something that confused me for a while - the phase. This thing would be better understood if you already have some understanding of phase and phase difference in terms of waves and sinusoidal waves, but I'll try to explain what I understood.</p>
+
+    <p>I know a lot of ML audio pipelines work with magnitude spectrograms only and throw phase away entirely. That's fine for many tasks - but understanding what phase is and what you're throwing away gives you a deeper understanding of the signal. And there are tasks where phase matters (speech synthesis, audio reconstruction, vocoder design). So this section is worth reading even if you're only doing magnitude-based feature extraction right now.</p>
+
+    <p>So the COM we get from FT is a complex number. It has a magnitude (distance from origin) and also an angle associated with it:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Phase</div>
+      <div class="formula">Phase = arctan(Imaginary(COM) / Real(COM))</div>
+    </div>
+
+    <p>That angle tells us the phase offset of the frequency component f as it exists inside the original signal. In simple terms - it tells you where in its cycle that frequency component starts at t = 0.</p>
+
+    <h3>A Misconception I Had</h3>
+
+    <p>I initially thought that for constituent frequencies, this phase would always be 0. Like, if a frequency is part of the original signal, the COM should just lie on the real axis, right? Phase 0, maximum sync, all that. Makes sense intutively no?</p>
+
+    <p>That's not true, and here's why.</p>
+
+    <p>If the original signal is g(t) = sin(2&pi;&middot;300&middot;t + &pi;/4), the frequency 300 Hz is absolutely a constituent frequency - it's literally the only frequency in the signal. But its phase offset is &pi;/4, not 0. The 300 Hz component doesn't start at zero amplitude at t = 0, it starts shifted by &pi;/4.</p>
+
+    <p>The FT will correctly output a high magnitude at f = 300 Hz AND the angle of the complex number will be &pi;/4, recovering the exact phase with which the 300 Hz component exists in the signal.</p>
+
+    <p>Phase is 0 only if the component happens to start at exactly the right reference point at t = 0. Otherwise, it can be anything. The magnitude tells you how much of that frequency is present. The phase tells you where in its cycle it starts. Both pieces of information come from the same complex number.</p>
+
+    <p>In code, you'd get these separately:</p>
+
+    <div class="code-block">
+      <div class="code-block-header">Python</div>
+      <pre><code>magnitude = np.abs(fft_result)      # how much of each frequency
+phase = np.angle(fft_result)         # where in its cycle each frequency starts</code></pre>
+    </div>
+
+    <p>When you compute a magnitude spectrogram (which is what most ML pipelines do), you're keeping the first and discarding the second. Now at least you know what you're throwing away.</p>
+
+    <h3>For Non-Constituent Frequencies</h3>
+
+    <p>For frequencies that aren't part of the original signal (like f = 500 Hz in our worked example), the magnitude is near zero. The phase you get in this case is essentially meaningless - it's the angle of a near-zero vector pointing in some arbitrary direction. Think of it as noise. The direction doesn't mean anything when the vector has no length.</p>
+
+    <p>It's quite intuitive when you think about it: for a non-constituent frequency, whatever the COM coordinates come out to be, they're so close to the origin that the angle is just numerical noise, not meaningful information about the signal.</p>
+
+    <h3>Why FT Handles Phase Automatically (This One Really Confused Me)</h3>
+
+    <p>Okay so this is a subtle point that took me a while to get. And I want to explain it clearly because it's the kind of thing that bugs you once you start thinking about it.</p>
+
+    <p>Here's the question: the FT only takes frequency f as input, right? We don't give it a phase angle. But for a particular input frequency, we could get different correlations if we vary the phase alignment between our test wave and the original signal. So how does FT find the "best" phase - the one that gives the maximum possible magnitude for input frequency f?</p>
+
+    <p>The answer: FT doesn't search or optimize over phase at all. It doesn't need to.</p>
+
+    <p>Here's why, and the key is Euler's formula:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Euler's Formula</div>
+      <div class="formula">e<sup>-2&pi;ift</sup> = cos(2&pi;ft) - i&middot;sin(2&pi;ft)</div>
+    </div>
+
+    <p>When we compute FT at frequency f, we're simultaneously correlating the signal with both cos(2&pi;ft) and sin(2&pi;ft). The real part of the output captures the cosine correlation. The imaginary part captures the sine correlation.</p>
+
+    <p>Now here's the important thing - any sinusoid at frequency f with any arbitrary phase &phi; can be decomposed as:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Phase Decomposition</div>
+      <div class="formula">A&middot;cos(2&pi;ft + &phi;) = A&middot;cos(&phi;)&middot;cos(2&pi;ft) - A&middot;sin(&phi;)&middot;sin(2&pi;ft)</div>
+    </div>
+
+    <p>So regardless of what phase the component has in the original signal, the FT automatically captures it:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">How FT Captures Any Phase</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Real part picks up</span>
+          <span class="calc-value">A&middot;cos(&phi;) &mdash; cosine correlation</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Imaginary part picks up</span>
+          <span class="calc-value">A&middot;sin(&phi;) &mdash; sine correlation</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Magnitude = &radic;(real&sup2; + imag&sup2;)</span>
+          <span class="calc-value accent">= A (true amplitude, any &phi;)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Angle = arctan(imag/real)</span>
+          <span class="calc-value accent">= &phi; (recovers exact phase)</span>
+        </div>
+      </div>
+    </div>
+
+    <p>It's like measuring the length of a vector by projecting it onto both the x-axis and y-axis. No matter which direction the vector points, you always recover its full length through &radic;(x&sup2; + y&sup2;). The complex exponential is basically testing all phases simultaneously because cosine and sine together cover all possible phase angles, they are orthogonal to each other.</p>
+
+    <p>No optimization. No searching. No iterating over phase values. Just the fact that cosine and sine are orthogonal and together they capture any phase. The math does it in one shot.</p>
+
+    <p>This is where I finally understood why complex numbers are used here and not just regular correlation with a single sine wave. Euler's formula is doing something very clever - it's correlating with two things at once and the complex number neatly packages both results together.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART VII — Putting It All Together
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-together">
+    <div class="section-label">Part VII</div>
+    <h2>Putting It All Together</h2>
+
+    <p>So the full picture of how we get from time domain to frequency domain:</p>
+
+    <div class="figure">
+      <img src="fourier-assets/fig5-ft-pipeline.png" alt="The Full Fourier Transform Pipeline - 6 steps from signal to frequency domain">
+      <div class="figure-caption"><strong>Figure 5:</strong> The full Fourier Transform pipeline: (1) Take signal g(t), (2) Pick frequency f, (3) Wind using g(t)&middot;e<sup>-2&pi;ift</sup>, (4) Find COM, (5) Plot (f, magnitude), (6) Repeat for all f. Match &rarr; lopsided winding &rarr; COM far &rarr; peak. No match &rarr; balanced winding &rarr; COM near origin &rarr; flat</div>
+    </div>
+
+    <div class="data-box">
+      <div class="data-box-header">The Complete FT Process</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Step 1</span>
+          <span class="calc-value">Take original audio signal g(t) - time domain data</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 2</span>
+          <span class="calc-value">Pick a frequency f</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 3</span>
+          <span class="calc-value">Wind g(t) around complex plane at speed f</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 4</span>
+          <span class="calc-value">Calculate the COM of the wound-up curve</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 5</span>
+          <span class="calc-value accent">Distance of COM from origin &rarr; amplitude of f</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 6</span>
+          <span class="calc-value accent">Angle of COM &rarr; phase offset of f</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 7</span>
+          <span class="calc-value">Plot (f, magnitude) on frequency domain graph</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 8</span>
+          <span class="calc-value">Repeat for all frequencies</span>
+        </div>
+      </div>
+    </div>
+
+    <p>The frequencies that are actually present in the original signal produce lopsided winding &rarr; COM far from origin &rarr; peaks in the graph. Frequencies that aren't present produce balanced winding &rarr; COM near origin &rarr; flat regions.</p>
+
+    <p>After doing this across all frequencies, we have the complete frequency domain graph. The peaks tell us the constituent frequencies of the original sound. That's the Fourier Transform - decomposing a complex signal into its building blocks.</p>
+
+    <p>The math is a tool to justify the intuition - the real understanding is in the winding, the Centre of Mass, and the way the complex exponential handles phase automatically through Euler's formula. Once these three things click, you get the Fourier Transform at an intuition level, and the heavy math derivations are just formalising what you already understand. And honestly once this clicks, you'll see FT everywhere in signal processing and it will all start making sense.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART VIII — The WHY
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-why">
+    <div class="section-label">Part VIII</div>
+    <h2>The WHY</h2>
+
+    <p>Why does the Fourier Transform work? The intuitive answer is what we've built through this entire piece - matching frequencies create lopsided windings, non-matching frequencies create balanced ones that cancel out. The winding machine is essentially a correlation detector - it measures how much the original signal correlates with a pure sinusoid at each frequency. High correlation means COM far from origin which gives a peak, low correlation means COM near origin and we get a flat region in the graph.</p>
+
+    <p>At its core, why this works rigorously would require heavy math derivation involving orthogonality of sinusoidal functions and properties of complex exponentials - which isn't the purpose of this piece. But the intuition we've built should be more than enough to understand what's happening and why the output makes sense. It works!</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       EPILOGUE — What Comes Next
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-next">
+    <div class="section-label">Epilogue</div>
+    <h2>What Comes Next</h2>
+
+    <p>This piece covers the continuous/conceptual Fourier Transform - the foundation. In practice, when you work with digital audio in ML pipelines, you're using the <strong>DFT (Discrete Fourier Transform)</strong> and its fast implementation the <strong>FFT</strong>. And when you compute spectrograms, you're using the <strong>STFT (Short-Time Fourier Transform)</strong> which applies the FT to small overlapping windows of the signal - that's where window size N, hop length, and overlap come in, but thats a topic for another writeup.</p>
+
+    <p>All of that builds directly on top of what we covered here. The winding machine, the COM, the magnitude and phase - it's the same mechanism, just applied to short chunks of audio instead of the whole thing at once. If this piece clicked for you, the rest will follow naturally. I might write about DFT and STFT in detail later.</p>
+
+    <div class="big-numbers">
+      <div class="big-num-cell">
+        <div class="big-num accent">DFT</div>
+        <div class="big-num-label">Discrete Fourier Transform</div>
+      </div>
+      <div class="big-num-cell dark">
+        <div class="big-num paper">FFT</div>
+        <div class="big-num-label">Fast implementation of DFT</div>
+      </div>
+      <div class="big-num-cell dark">
+        <div class="big-num paper">STFT</div>
+        <div class="big-num-label">FT on short overlapping windows</div>
+      </div>
+      <div class="big-num-cell">
+        <div class="big-num accent">Spectrogram</div>
+        <div class="big-num-label">Visual output of STFT</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       CONTACT
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-contact">
+    <p><em>Feel free to ping to ask anything related here:</em></p>
+    <p>Thanks for the patience if you've read this far, and thanks to grammarly for helping with the editing.</p>
+    <div class="contact-links">
+      <a class="contact-link" href="mailto:amannagrawall002@gmail.com">Email</a>
+      <a class="contact-link" href="https://x.com/r4plh">Twitter</a>
+      <a class="contact-link" href="https://github.com/r4plh">GitHub</a>
+      <a class="contact-link" href="https://www.linkedin.com/in/r4plh/">LinkedIn</a>
+    </div>
+  </div>
+
+  <div style="height: 60px;"></div>
+
+  <!-- COMMENTS -->
+  <div class="section visible" id="comments">
+    <div class="section-label">Discussion</div>
+    <h2>Comments</h2>
+    <script src="https://giscus.app/client.js"
+        data-repo="r4plh/r4plh.github.io"
+        data-repo-id="R_kgDONoAmYw"
+        data-category="General"
+        data-category-id="DIC_kwDONoAmY84C3y-n"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="noborder_dark"
+        data-lang="en"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+    </script>
+  </div>
+
+  <div style="height: 80px;"></div>
+
+</article>
+
+<footer>
+  <div style="font-size:14px; color: rgba(247,243,238,0.6); font-family: 'Playfair Display', serif; font-style:italic; margin-bottom: 12px;">
+    "The math is a tool to justify the intuition - the real understanding is in the winding, the Centre of Mass, and the way the complex exponential handles phase automatically through Euler's formula."
+  </div>
+  A deep dive into the <strong>Fourier Transform</strong> - from <strong>time domain</strong> to <strong>frequency domain</strong>, built on <strong>intuition</strong> over derivation
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
