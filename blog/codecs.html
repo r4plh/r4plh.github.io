@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BB0R0PGQ15"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BB0R0PGQ15');</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Audio Codecs — Dissected, Compared, and Benchmarked on Indian Languages</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --ink-light: #4a4540;
+    --ink-faint: #8a847e;
+    --paper: #f7f3ee;
+    --paper-dark: #ede8e0;
+    --accent: #c8440a;
+    --accent-light: #e8692a;
+    --accent-faint: #f5ddd0;
+    --green: #2d6a4f;
+    --code-bg: #1e1b18;
+    --code-text: #e8d5b0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 19px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 80px 0 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .masthead::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200,68,10,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 50%, transparent 100%);
+  }
+
+  .masthead-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    color: var(--paper);
+  }
+
+  h1 em {
+    color: var(--accent-light);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    font-weight: 300;
+    color: rgba(247,243,238,0.65);
+    line-height: 1.6;
+    max-width: 600px;
+    font-style: italic;
+  }
+
+  .byline {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(247,243,238,0.12);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(247,243,238,0.4);
+    letter-spacing: 0.08em;
+  }
+
+  .byline a {
+    color: var(--accent-light);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(232,105,42,0.3);
+    transition: border-color 0.2s;
+  }
+
+  .byline a:hover {
+    border-bottom-color: var(--accent-light);
+  }
+
+  article {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .section {
+    padding: 72px 0 0;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--accent-faint);
+    max-width: 60px;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+
+  h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--ink);
+    margin: 40px 0 16px;
+  }
+
+  p {
+    margin-bottom: 24px;
+    color: var(--ink-light);
+    font-weight: 300;
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .dropcap::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 5.2em;
+    font-weight: 900;
+    float: left;
+    line-height: 0.78;
+    margin: 8px 12px 0 0;
+    color: var(--accent);
+  }
+
+  .pullquote {
+    margin: 52px -24px;
+    padding: 36px 48px;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pullquote::before {
+    content: '\201C';
+    font-family: 'Playfair Display', serif;
+    font-size: 180px;
+    color: rgba(200,68,10,0.2);
+    position: absolute;
+    top: -30px; left: 20px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .pullquote p {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--paper);
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  .data-box {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    background: white;
+    overflow: hidden;
+  }
+
+  .data-box-header {
+    background: var(--paper-dark);
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .data-box-body {
+    padding: 28px 24px;
+  }
+
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--paper-dark);
+    font-size: 15px;
+  }
+
+  .calc-row:last-child { border-bottom: none; }
+
+  .calc-label {
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-right: 16px;
+  }
+
+  .calc-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    text-align: right;
+  }
+
+  .calc-value.accent { color: var(--accent); font-weight: 600; }
+  .calc-value.green { color: var(--green); font-weight: 600; }
+
+  .formula-box {
+    margin: 40px 0;
+    padding: 28px 32px;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    position: relative;
+  }
+
+  .formula-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+  }
+
+  .formula-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.4);
+    margin-bottom: 14px;
+  }
+
+  .formula {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    font-style: italic;
+    color: var(--accent-light);
+    letter-spacing: 0.02em;
+  }
+
+  .formula sub {
+    font-size: 0.65em;
+    vertical-align: baseline;
+    position: relative;
+    top: 0.3em;
+  }
+
+  .comparison {
+    margin: 44px 0;
+    overflow: hidden;
+    border: 1px solid var(--paper-dark);
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .comparison-row.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .comparison-row.four-col {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  .comparison-row.header {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .comparison-row:not(.header):nth-child(even) { background: white; }
+  .comparison-row:not(.header):nth-child(odd) { background: var(--paper); }
+
+  .comparison-cell {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    border-right: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .comparison-cell:last-child { border-right: none; }
+  .comparison-row.header .comparison-cell {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.6);
+  }
+
+  .highlight-row .comparison-cell {
+    background: var(--accent-faint);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: var(--paper-dark);
+    padding: 2px 7px;
+    color: var(--accent);
+    border-radius: 2px;
+  }
+
+  .code-block {
+    margin: 36px 0;
+    background: var(--code-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .code-block-header {
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(232,213,176,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .code-block pre {
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--code-text);
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+    border-radius: 0;
+  }
+
+  .definition {
+    margin: 36px 0;
+    padding: 24px 28px 24px 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-faint);
+  }
+
+  .definition-term {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .definition p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--ink-light);
+  }
+
+  .divider {
+    margin: 60px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--paper-dark);
+  }
+
+  .divider-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+  }
+
+  .figure {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    background: white;
+    overflow: hidden;
+  }
+
+  .figure img {
+    width: 100%;
+    display: block;
+  }
+
+  .figure-placeholder {
+    background: var(--ink);
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+  }
+
+  .figure-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(200,68,10,0.04) 20px,
+      rgba(200,68,10,0.04) 40px
+    );
+    pointer-events: none;
+  }
+
+  .figure-placeholder-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(247,243,238,0.35);
+    text-align: center;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .figure-placeholder-text .icon {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  .figure-caption {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .figure-caption strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .analogy-map {
+    margin: 44px 0;
+    border: 1px solid var(--paper-dark);
+    overflow: hidden;
+  }
+
+  .analogy-map-header {
+    background: var(--ink);
+    padding: 14px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,243,238,0.5);
+  }
+
+  .analogy-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--paper-dark);
+    background: white;
+    font-size: 15px;
+  }
+
+  .analogy-row:nth-child(even) { background: var(--paper); }
+  .analogy-row:last-child { border-bottom: none; }
+
+  .analogy-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 16px;
+    padding: 0 16px;
+  }
+
+  .analogy-left {
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .analogy-right {
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .big-numbers {
+    margin: 44px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-dark);
+  }
+
+  .big-num-cell {
+    background: white;
+    padding: 28px 24px;
+  }
+
+  .big-num-cell.dark {
+    background: var(--ink);
+  }
+
+  .big-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .big-num.accent { color: var(--accent); }
+  .big-num.green { color: var(--green); }
+  .big-num.paper { color: var(--paper); }
+
+  .big-num-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .big-num-cell.dark .big-num-label { color: rgba(247,243,238,0.4); }
+
+  .contact-links {
+    margin: 36px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .contact-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid var(--accent-faint);
+    background: white;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .contact-link:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  footer {
+    margin-top: 100px;
+    padding: 52px 40px;
+    background: var(--ink);
+    color: rgba(247,243,238,0.4);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  footer strong {
+    color: var(--accent-light);
+    font-weight: 500;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .masthead-inner > * {
+    animation: fadeUp 0.8s ease forwards;
+  }
+
+  .masthead-inner .tag { animation-delay: 0.1s; }
+  .masthead-inner h1 { animation-delay: 0.25s; }
+  .masthead-inner .subtitle { animation-delay: 0.4s; }
+  .masthead-inner .byline { animation-delay: 0.55s; }
+
+  @media (max-width: 600px) {
+    article { padding: 0 20px; }
+    .masthead-inner { padding: 0 20px; }
+    .pullquote { margin: 40px -20px; padding: 28px 28px; }
+    .big-numbers { grid-template-columns: 1fr; }
+    .comparison-cell { padding: 10px 12px; font-size: 11px; }
+    .comparison-row.four-col { grid-template-columns: 1fr 1fr; }
+    .analogy-row { grid-template-columns: 1fr; gap: 4px; }
+    .analogy-arrow { display: none; }
+    .formula { font-size: 20px; }
+    .contact-links { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="tag">Neural Audio Codecs &middot; RVQ &middot; FSQ &middot; VAE &middot; Indic Evaluation</div>
+    <h1>Neural Audio <em>Codecs</em> &mdash; Dissected, Compared, and <em>Benchmarked</em> on Indian Languages</h1>
+    <p class="subtitle">Four codec architectures from first principles. The first systematic evaluation on five Indian languages. One codec hits 17% WER on Hindi &mdash; another hits 83% on Tamil. Your choice of codec matters more than you think.</p>
+    <div class="byline">By Aman Agrawal &nbsp;&middot;&nbsp; <a href="https://x.com/r4plh">@r4plh</a> &nbsp;&middot;&nbsp; Original Research &amp; Deep Dive</div>
+  </div>
+</header>
+
+<article>
+
+  <!-- ════════════════════════════════════════
+       PROLOGUE
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-prologue">
+    <div class="section-label">Prologue</div>
+    <h2>The Complete Picture</h2>
+
+    <p class="dropcap">I've spent the last few months going deep into neural audio codecs - not just reading papers, but actually building a speech enhancement model on top of DAC (Descript Audio Codec) at my current role. So a lot of whats written here comes from actually running into these things in real pipelines, not just textbook reading.</p>
+
+    <p>This article is going to be a detailed read. I'll walk you through the audio fundamentals you need to understand first, and then 4 fundamentally different approaches to encoding audio into a compact representation - RVQ based codecs (DAC, EnCodec), FSQ based codecs (NanoCodec), semantic-aware codecs (Mimi), and continuous VAE based approaches (like what DiTAR uses). By the end you'll understand not just WHAT each does, but WHY they exist and WHEN you'd pick one over the other.</p>
+
+    <p>Lets get into it.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART 0 — Audio Fundamentals
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-fundamentals">
+    <div class="section-label">Part 0</div>
+    <h2>Audio Fundamentals (You Need This First)</h2>
+
+    <p>Before we talk about neural codecs, you need to understand what audio actually IS as data. If you already know sampling, spectrograms, and mel filters, skip ahead. But if you're coming from NLP or vision and thinking "audio is just another modality" - slow down. Audio has properties that make it fundamentally different from text or images, and these properties directly explain WHY codecs are designed the way they are.</p>
+
+    <h3>Audio is a 1D signal sampled over time</h3>
+
+    <p>When you record speech at 16kHz, you're capturing 16,000 amplitude values per second. Thats it. Just a long list of numbers.</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Sample Rates</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">1 sec @ 16 kHz</span>
+          <span class="calc-value">16,000 values</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">1 sec @ 24 kHz</span>
+          <span class="calc-value">24,000 values</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">1 sec @ 44.1 kHz</span>
+          <span class="calc-value accent">44,100 values (CD quality)</span>
+        </div>
+      </div>
+    </div>
+
+    <p>Why different sample rates? Nyquist theorem - you need at least 2&times; the highest frequency you care about. Human speech mostly lives below 8kHz, so 16kHz is enough for speech. Music has content up to ~20kHz, so you need 44.1kHz.</p>
+
+    <p>From my personal experience working with speech data for model training, I didn't feel much of a difference between 16kHz, 24kHz, and 48kHz for speech. But for music? 16kHz sounds noticeably worse. This matters for codec design - speech codecs can get away with lower sample rates than music codecs.</p>
+
+    <h3>The time-frequency tradeoff</h3>
+
+    <p>Raw waveform is in the time domain. But a lot of whats interesting about audio lives in the frequency domain. This is where the Short-Time Fourier Transform (STFT) comes in.</p>
+
+    <div class="pullquote">
+      <p>STFT takes a waveform and tells you: at each moment in time, which frequencies are present and how loud they are.</p>
+    </div>
+
+    <p>You slide a window across the audio (say 25ms wide, hopping 10ms at a time), apply the Fourier Transform to each window, and you get a spectrogram - a 2D representation where:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Spectrogram Axes</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">X axis</span>
+          <span class="calc-value">Time</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Y axis</span>
+          <span class="calc-value">Frequency</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Color / brightness</span>
+          <span class="calc-value accent">Magnitude (how loud)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header">STFT Shape</div>
+      <pre><code>Raw waveform: [16000 samples] for 1 second
+After STFT:   [frequency_bins &times; time_frames] = e.g. [513 &times; 100]</code></pre>
+    </div>
+
+    <p>Now heres the thing. The spectrogram has magnitude AND phase. Magnitude tells you how loud each frequency is. Phase tells you where in its cycle each frequency is. Magnitude is perceptually meaningful - your ears care about it. Phase? Your ears are mostly insensitive to it.</p>
+
+    <p>This is exactly why mel spectrograms became popular for TTS. Take the magnitude spectrogram, apply mel filterbanks (which mimic how the human ear perceives frequency - we're more sensitive to low frequencies than high), and you get a compact representation that captures what matters perceptually.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Audio Feature Pipeline</div>
+      <div class="formula" style="font-size: clamp(14px, 3vw, 20px);">Waveform [16000] &rarr; STFT &rarr; Mag Spec [513&times;100] &rarr; Mel &rarr; [80&times;100]</div>
+    </div>
+
+    <p>80 mel bins &times; 100 time frames = 8000 values to represent 1 second of audio. Way more compact than 16000 raw samples.</p>
+
+    <h3>MFCCs - taking it one step further</h3>
+
+    <div class="definition">
+      <div class="definition-term">MFCC</div>
+      <p>Mel-Frequency Cepstral Coefficients - what you get when you take the mel spectrogram and apply a Discrete Cosine Transform (DCT) to decorrelate the mel bins. You typically keep only the first 13 coefficients.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header">MFCC Pipeline</div>
+      <pre><code>Mel spectrogram [80 &times; 100] &rarr; DCT &rarr; MFCCs [13 &times; 100]</code></pre>
+    </div>
+
+    <p>MFCCs capture the "shape" of the spectrum - which roughly corresponds to the shape of the vocal tract. This is why they were THE feature for speech recognition for decades before deep learning. I used MFCCs in my SyncNet work for audio-visual synchronization scoring.</p>
+
+    <h3>So why not just use mel spectrograms for everything?</h3>
+
+    <p>This is the key question. If mel spectrograms are so compact and perceptually meaningful, why did we need neural codecs?</p>
+
+    <p>Two reasons:</p>
+
+    <p><strong>1. Phase reconstruction problem.</strong> Mel spectrograms throw away phase. To get audio back, you need a vocoder (Griffin-Lim, WaveNet, HiFi-GAN) that "invents" plausible phase. This works okay but introduces artifacts. Theres a quality ceiling you cant get past because the phase information is gone forever.</p>
+
+    <p><strong>2. Not discrete.</strong> Modern language models (GPT, LLama) work with discrete tokens. Mel spectrograms are continuous. You cant do next-token prediction on continuous values using standard cross-entropy loss and softmax. You'd need regression (MSE loss), which tends to produce blurry/averaged outputs.</p>
+
+    <div class="pullquote">
+      <p>Neural audio codecs solve both problems: they encode audio into discrete tokens that can be decoded back to audio near-losslessly. No phase reconstruction needed. And the tokens plug directly into a language model for next-token prediction.</p>
+    </div>
+
+    <p>Thats the paradigm shift. From continuous lossy representations to discrete near-lossless tokens.</p>
+
+    <h3>Vector Quantization - the bridge between continuous and discrete</h3>
+
+    <p>Before we get to the specific codecs, you need to understand Vector Quantization (VQ). This is the fundamental operation that converts continuous representations into discrete tokens.</p>
+
+    <div class="definition">
+      <div class="definition-term">Vector Quantization (VQ)</div>
+      <p>Given a continuous vector, find the closest entry in a fixed codebook and return its index.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header">VQ Example</div>
+      <pre><code>Codebook: 1024 entries, each 8-dimensional
+  Entry 0:   [0.1, -0.3, 0.5, 0.2, -0.1, 0.4, 0.3, -0.2]
+  Entry 1:   [0.4, 0.1, -0.2, 0.6, 0.3, -0.5, 0.1, 0.7]
+  ...
+  Entry 1023: [-0.2, 0.5, 0.1, -0.4, 0.6, 0.2, -0.3, 0.1]
+
+Input vector: [0.38, 0.12, -0.19, 0.55, 0.28, -0.48, 0.09, 0.65]
+
+Find closest: Entry 1 (smallest Euclidean distance)
+Output: index = 1</code></pre>
+    </div>
+
+    <p>Thats it. You've converted a continuous 8-dim vector into a single integer. You can transmit that integer (10 bits for 1024 entries) instead of the full vector (8 &times; 32 bits = 256 bits). Massive compression.</p>
+
+    <p>The problem? One codebook with 1024 entries cant capture all the nuance of audio. You'd need millions of entries to get good quality, which defeats the purpose of compression. This is where the different codec approaches diverge - each one has a different strategy for getting high quality reconstruction with manageable codebook sizes.</p>
+
+    <p>Now lets look at the four approaches.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART I — Why Codecs for ML
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-why-codecs">
+    <div class="section-label">Part I</div>
+    <h2>Why Do We Even Need Audio Codecs for ML?</h2>
+
+    <p>Before 2022, if you wanted to build a text-to-speech system, you'd generate mel spectrograms and then use a vocoder (like HiFi-GAN) to convert them back to audio. The problem? Mel spectrograms throw away phase information. You literally cant reconstruct the original audio perfectly from a mel spectrogram - the vocoder has to "guess" the phase. This works okay, but theres a ceiling on quality.</p>
+
+    <p>Neural audio codecs changed this completely. The idea is simple:</p>
+
+    <div class="pullquote">
+      <p>Take raw audio &rarr; compress it into a sequence of discrete tokens (like words in a sentence) &rarr; decompress back to audio with near-perfect reconstruction.</p>
+    </div>
+
+    <p>Now instead of generating mel spectrograms, your TTS model can generate these tokens directly. And since the codec can reconstruct audio from tokens almost perfectly, the quality ceiling goes way up.</p>
+
+    <p>So basically what happened is - the field shifted from "generate a lossy representation and hope the vocoder fills in the gaps" to "generate exact tokens that the codec decoder can perfectly reconstruct." Thats the paradigm shift.</p>
+
+    <p>The question then becomes: HOW do you compress audio into tokens? And this is where things get interesting, because there are fundamentally different philosophies.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART II — RVQ (DAC, EnCodec)
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-rvq">
+    <div class="section-label">Part II &mdash; Approach 1</div>
+    <h2>RVQ Based Codecs (DAC, EnCodec)</h2>
+
+    <p>This is where it all started. EnCodec came from Meta in 2022, and DAC (Descript Audio Codec) followed in 2023. I've worked extensively with DAC at 16kHz with 12 codebooks for my speech enhancement work, so I'll explain this one in detail.</p>
+
+    <h3>The WHAT</h3>
+
+    <p>RVQ stands for Residual Vector Quantization. The "residual" part is the key insight.</p>
+
+    <p>Imagine you have a continuous audio feature vector - lets say its 64-dimensional. You want to represent it using a discrete token (an index into a codebook). But one codebook cant capture all the detail. So you do this:</p>
+
+    <div class="code-block">
+      <div class="code-block-header">Residual Vector Quantization</div>
+      <pre><code>Original signal: [0.5, -0.3, 0.8, ...]  (64-dim continuous vector)
+
+Codebook 1 (1024 entries, each 8-dim):
+  Find closest entry &rarr; index 42 &rarr; codeword [0.4, -0.2, 0.7, ...]
+  Residual = original - codeword = [0.1, -0.1, 0.1, ...]
+
+Codebook 2 (1024 entries, each 8-dim):
+  Quantize the RESIDUAL &rarr; index 107 &rarr; codeword [0.08, -0.09, 0.11, ...]
+  Residual = previous residual - codeword = [0.02, -0.01, -0.01, ...]
+
+Codebook 3:
+  Quantize the even smaller residual &rarr; index 5
+  ...
+
+Keep going for 12 codebooks.</code></pre>
+    </div>
+
+    <p>So Codebook 1 captures the coarse structure (fundamental frequency, energy). Codebook 2 captures what CB1 missed. Codebook 3 captures what CB1+CB2 missed. And so on. Each subsequent codebook handles finer and finer details.</p>
+
+    <div class="analogy-map">
+      <div class="analogy-map-header">RVQ Codebook Hierarchy</div>
+      <div class="analogy-row">
+        <span class="analogy-left">Codebook 1</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Coarse structure (F0, energy)</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Codebook 2</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">What CB1 missed</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Codebook 3</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">What CB1+CB2 missed</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Codebook 12</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Finest residual details</span>
+      </div>
+    </div>
+
+    <p>Now heres what this looks like for DAC specifically:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">DAC at 16kHz</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Codebooks</span>
+          <span class="calc-value accent">12</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Entries per codebook</span>
+          <span class="calc-value">1,024</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Codeword dimensions</span>
+          <span class="calc-value">8</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Frame rate</span>
+          <span class="calc-value accent">~86 Hz (86 frames/sec)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Bitrate</span>
+          <span class="calc-value">~8 kbps</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Tokens per second</span>
+          <span class="calc-value accent">86 &times; 12 = 1,032</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>The Architecture</h3>
+
+    <div class="formula-box">
+      <div class="formula-label">DAC Pipeline</div>
+      <div class="formula" style="font-size: clamp(12px, 2.5vw, 16px); letter-spacing: 0;">Waveform &rarr; Conv Encoder &rarr; RVQ (12 CB) &rarr; Dequantize &rarr; Conv Decoder &rarr; Waveform</div>
+    </div>
+
+    <p>The encoder and decoder are purely convolutional - no transformers, no attention. Just stacked conv layers with residual blocks. The magic is all in the RVQ bottleneck.</p>
+
+    <h3>Training</h3>
+
+    <p>DAC trains with multiple losses simultaneously:</p>
+
+    <p><strong>1. Reconstruction loss:</strong> MSE between original and reconstructed waveform + multi-scale STFT loss (compares frequency content at multiple resolutions)</p>
+
+    <p><strong>2. Adversarial loss:</strong> Multi-Period Discriminator (MPD) and Multi-Scale Discriminator (MSD) - same discriminators from HiFi-GAN. The decoder has to fool these discriminators into thinking the reconstructed audio is real.</p>
+
+    <p><strong>3. Commitment loss:</strong> standard VQ loss that prevents the encoder output from drifting too far from codebook entries.</p>
+
+    <p>The codec is trained separately from any downstream model and then frozen. This is important - when I built my speech enhancement model on top of DAC, the DAC encoder and decoder were completely frozen. Only my model's weights were trained.</p>
+
+    <p>And here's something I verified myself - DAC generalizes remarkably well even to languages it was never trained on. I ran the first systematic evaluation of DAC on Indian language speech (Hindi, Tamil, Telugu, Bengali, Kannada) and it achieved a mean PESQ of 4.473, STOI of 0.992, and speaker similarity of 0.987 across all five languages. Near-perfect reconstruction on languages the model never saw during training. More on this experiment later in this piece.</p>
+
+    <h3>The Problem With RVQ</h3>
+
+    <p>Heres the thing that bit me in practice. Because codebooks are hierarchical (CB2 depends on CB1's residual, CB3 depends on CB1+CB2's residual), you cant predict all 12 codebooks independently. You HAVE to go in order.</p>
+
+    <p>For my Genhancer model, this meant during inference I had to generate codebooks sequentially:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Sequential RVQ Prediction</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Step 1</span>
+          <span class="calc-value">Predict all CB1 tokens for all frames</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 2</span>
+          <span class="calc-value">Predict CB2 tokens (knowing CB1)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 3</span>
+          <span class="calc-value">Predict CB3 (knowing CB1+CB2)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">...</span>
+          <span class="calc-value">...</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Step 12</span>
+          <span class="calc-value accent">12 forward passes total</span>
+        </div>
+      </div>
+    </div>
+
+    <p>Thats 12 forward passes through the model. Or you use tricks like delay patterns (MusicGen style) or MaskGIT, but the fundamental dependency is still there.</p>
+
+    <p>Also - codebook collapse. Sometimes during training, certain codebook entries never get used. The codebook "collapses" to only using a subset of its entries. This wastes capacity. DAC and EnCodec both deal with this using techniques like EMA updates and codebook reset, but its a real problem.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART III — FSQ (NanoCodec)
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-fsq">
+    <div class="section-label">Part III &mdash; Approach 2</div>
+    <h2>FSQ Based Codecs (NanoCodec / LFSC from Koel-TTS)</h2>
+
+    <p>This is the newer approach from NVIDIA, released in 2024. I read the Koel-TTS paper in detail for my Sarvam interview prep, and honestly this is elegant.</p>
+
+    <h3>The Key Insight</h3>
+
+    <p>Instead of learning codebook entries (which can collapse), just... dont learn them. Round each dimension to a fixed set of levels.</p>
+
+    <div class="comparison">
+      <div class="comparison-row header two-col">
+        <div class="comparison-cell">RVQ Approach</div>
+        <div class="comparison-cell">FSQ Approach</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Learn 1024 codewords of 8-dim each</div>
+        <div class="comparison-cell">Each dimension gets fixed levels</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Hope they dont collapse</div>
+        <div class="comparison-cell">No collapse possible</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Learned codebook</div>
+        <div class="comparison-cell">Deterministic quantization</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header">FSQ Levels</div>
+      <pre><code>FSQ: Each dimension gets fixed levels. No learning needed.
+  Dimension 1: round to one of [8 levels]
+  Dimension 2: round to one of [7 levels]
+  Dimension 3: round to one of [6 levels]
+  Dimension 4: round to one of [6 levels]
+
+  Total combinations: 8 &times; 7 &times; 6 &times; 6 = 2016 unique codes per codebook</code></pre>
+    </div>
+
+    <p>No codebook to learn. No collapse possible. The quantization is deterministic.</p>
+
+    <h3>Why This Changes Everything for TTS</h3>
+
+    <p>The MASSIVE difference: FSQ codebooks are INDEPENDENT. CB1 and CB2 and CB3 all quantize independent dimensions of the same feature vector. There is no residual relationship.</p>
+
+    <p>So what does this mean? At each decoder timestep, your TTS model can predict all 8 codebooks IN PARALLEL with a single linear layer:</p>
+
+    <div class="formula-box">
+      <div class="formula-label">FSQ Parallel Prediction</div>
+      <div class="formula" style="font-size: clamp(13px, 2.5vw, 18px); letter-spacing: 0;">hidden [768] &rarr; Linear(768, 8&times;2016) &rarr; reshape [8, 2016] &rarr; 8 softmaxes</div>
+    </div>
+
+    <p>One forward pass. 8 indices. Done.</p>
+
+    <p>Compare this to RVQ where you need sequential prediction across codebooks. For production TTS with streaming requirements, this parallel prediction is a massive win.</p>
+
+    <h3>NanoCodec Specifics</h3>
+
+    <p>NVIDIA released this on HuggingFace (<code>nvidia/nemo-nano-codec-22khz-1.89kbps-21.5fps</code>). Its open source and you can pip install it.</p>
+
+    <div class="data-box">
+      <div class="data-box-header">NanoCodec Specs</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Codebooks</span>
+          <span class="calc-value">8 (FSQ, independent)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Codes per codebook</span>
+          <span class="calc-value">2,016 [8, 7, 6, 6] levels</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Frame rate</span>
+          <span class="calc-value accent">21.5 Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Output sample rate</span>
+          <span class="calc-value">22,050 Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Bitrate</span>
+          <span class="calc-value green">1.89 kbps</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Parameters</span>
+          <span class="calc-value">62M</span>
+        </div>
+      </div>
+    </div>
+
+    <p>Now look at that frame rate. 21.5 Hz. Compare to DAC at 86 Hz. Thats 4x fewer frames per second.</p>
+
+    <p>Why does this matter? If you're doing autoregressive TTS, you generate one frame at a time. At 86 Hz (DAC), 10 seconds of audio = 860 autoregressive steps. At 21.5 Hz (NanoCodec), 10 seconds = 215 steps. 4x fewer steps = 4x faster generation. For streaming TTS where you need sub-250ms latency, this is the difference between "works" and "doesnt work."</p>
+
+    <div class="big-numbers">
+      <div class="big-num-cell">
+        <div class="big-num accent">860</div>
+        <div class="big-num-label">Steps for 10s @ DAC 86 Hz</div>
+      </div>
+      <div class="big-num-cell dark">
+        <div class="big-num paper">215</div>
+        <div class="big-num-label">Steps for 10s @ NanoCodec 21.5 Hz</div>
+      </div>
+    </div>
+
+    <p>The architecture is similar to DAC - convolutional encoder, convolutional decoder (HiFi-GAN based), same discriminators (MPD + multi-band multi-scale STFT + WavLM discriminator). The only difference is FSQ instead of RVQ in the bottleneck, and the architecture is designed for lower frame rates.</p>
+
+    <p>One thing I should note - when I ran my Indic codec evaluation, I couldn't include NanoCodec due to protobuf/onnx dependency conflicts. This is a gap worth filling since NanoCodec is the codec behind Koel-TTS and MagpieTTS, and its FSQ architecture is fundamentally different from the RVQ codecs I was able to test.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART IV — Mimi
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-mimi">
+    <div class="section-label">Part IV &mdash; Approach 3</div>
+    <h2>Mimi (Semantic Distillation + RVQ)</h2>
+
+    <p>Mimi came from Kyutai in 2024, and its the codec that powers Moshi - the first real-time full-duplex voice conversation model. Mimi is special because it solved a problem that had been annoying the field for years.</p>
+
+    <h3>The Problem Mimi Solved</h3>
+
+    <p>Before Mimi, if you wanted to build a speech language model (like AudioLM or VALL-E), you needed TWO separate token streams:</p>
+
+    <div class="comparison">
+      <div class="comparison-row header two-col">
+        <div class="comparison-cell">Semantic Tokens</div>
+        <div class="comparison-cell">Acoustic Tokens</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">From HuBERT / WavLM</div>
+        <div class="comparison-cell">From EnCodec / DAC</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Captures WHAT is said</div>
+        <div class="comparison-cell">Captures HOW it sounds</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Content, phonemes, words</div>
+        <div class="comparison-cell">Speaker voice, room acoustics</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Throws away speaker identity</div>
+        <div class="comparison-cell">Doesnt explicitly model content</div>
+      </div>
+    </div>
+
+    <p>Two encoders. Two token streams. Complex merging strategies. AudioLM had a whole hierarchical pipeline for this.</p>
+
+    <p>Mimi's insight: what if we just distill the semantic information INTO the codec during training?</p>
+
+    <h3>How Semantic Distillation Works</h3>
+
+    <p>During training, Mimi does something extra alongside the normal reconstruction loss:</p>
+
+    <div class="code-block">
+      <div class="code-block-header">Semantic Distillation</div>
+      <pre><code>Same audio &rarr; frozen WavLM encoder &rarr; semantic features [T, D]
+Same audio &rarr; Mimi encoder &rarr; Mimi features &rarr; after RVQ codebook 1 &rarr; CB1 output [T, D]
+
+Extra loss: cosine_similarity(CB1_output, WavLM_features)</code></pre>
+    </div>
+
+    <p>This forces codebook 1 to learn representations that are similar to WavLM's semantic features. After training:</p>
+
+    <div class="analogy-map">
+      <div class="analogy-map-header">Mimi Codebook Roles</div>
+      <div class="analogy-row">
+        <span class="analogy-left">Codebook 1</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Content / semantics (what is said)</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Codebooks 2-8</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Acoustics (how it sounds)</span>
+      </div>
+    </div>
+
+    <p>One codec. One encoder. One token stream. Both semantic and acoustic information.</p>
+
+    <h3>The Transformer Bottleneck</h3>
+
+    <p>Another thing that makes Mimi different from DAC/EnCodec - it has transformers inside the codec.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Mimi Architecture</div>
+      <div class="formula" style="font-size: clamp(12px, 2.5vw, 17px); letter-spacing: 0;">Conv Enc &rarr; 8 Transformer (CAUSAL) &rarr; RVQ &rarr; 8 Transformer (CAUSAL) &rarr; Conv Dec</div>
+    </div>
+
+    <p>DAC and EnCodec are purely convolutional. Mimi adds transformer layers before and after the quantization step. These capture long-range temporal dependencies that convolutions miss.</p>
+
+    <p>And critically - these transformers are CAUSAL. Each frame only attends to current and past frames, not future. This makes Mimi fully streamable with 80ms latency. You can process audio chunk by chunk in real-time.</p>
+
+    <h3>Mimi By The Numbers</h3>
+
+    <div class="data-box">
+      <div class="data-box-header">Mimi Specs</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Output sample rate</span>
+          <span class="calc-value">24 kHz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Frame rate</span>
+          <span class="calc-value accent">12.5 Hz (!!!)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Codebooks</span>
+          <span class="calc-value">8 (RVQ)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Entries per codebook</span>
+          <span class="calc-value">2,048</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Bitrate</span>
+          <span class="calc-value green">1.1 kbps</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Streaming</span>
+          <span class="calc-value green">Fully causal</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Algorithmic latency</span>
+          <span class="calc-value accent">80ms</span>
+        </div>
+      </div>
+    </div>
+
+    <p>12.5 Hz frame rate at 1.1 kbps. For context, EnCodec operates at 75 Hz and 6 kbps. Mimi is 6x more compressed in frame rate AND 6x more compressed in bitrate. And it still sounds good because the transformer layers compensate for the aggressive compression.</p>
+
+    <p>This is what enabled Moshi to do full-duplex conversation at 200ms latency. At 12.5 Hz, one second of audio is just 12.5 &times; 8 = 100 tokens. Two audio streams (user + assistant) = 200 tokens per second. Thats manageable for a 7B transformer. At EnCodec's 75 Hz, it would be 1200 tokens per second - way too many.</p>
+
+    <div class="big-numbers">
+      <div class="big-num-cell">
+        <div class="big-num accent">100</div>
+        <div class="big-num-label">Tokens/sec with Mimi (12.5 Hz &times; 8)</div>
+      </div>
+      <div class="big-num-cell dark">
+        <div class="big-num paper">1,200</div>
+        <div class="big-num-label">Tokens/sec with EnCodec (75 Hz &times; 16)</div>
+      </div>
+    </div>
+
+    <h3>The Indic Language Problem</h3>
+
+    <p>Now heres something I've been thinking about. Mimi distills from WavLM, which is trained on English data. WavLM's representations encode English phonetic categories.</p>
+
+    <p>What happens when you encode Hindi speech through Mimi? Codebook 1 tries to capture semantics using English-trained representations. Hindi has retroflex consonants (&#2335;, &#2337;) vs dental consonants (&#2340;, &#2342;) that English doesn't distinguish. These might map to the same semantic token in codebook 1, destroying information that can never be recovered.</p>
+
+    <p>This isn't theoretical - the DualCodec paper (Interspeech 2025) showed that SpeechTokenizer (which uses HuBERT distillation, same idea as Mimi) gets <strong>83.2% WER on Chinese</strong>. Catastrophic failure. Because HuBERT cant capture Mandarin tonal distinctions.</p>
+
+    <p>The fix? Use a multilingual teacher model like mHuBERT-147 (trained on 147 languages) instead of English-only WavLM. Or use IndicWav2Vec for Indian languages specifically.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART V — Continuous VAE (DiTAR)
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-vae">
+    <div class="section-label">Part V &mdash; Approach 4</div>
+    <h2>Continuous VAE (DiTAR Style)</h2>
+
+    <p>Now we get to the approach that says - why quantize at all?</p>
+
+    <p>DiTAR (ByteDance, 2025) uses a VAE instead of a discrete codec. No codebooks. No quantization. No information loss from discretization.</p>
+
+    <h3>The Architecture</h3>
+
+    <div class="code-block">
+      <div class="code-block-header">DiTAR VAE Pipeline</div>
+      <pre><code>24kHz waveform &rarr; Conv Encoder &rarr; &mu;, &sigma; (mean and variance)
+  &rarr; z = &mu; + &sigma; &times; &epsilon; (reparameterization trick)
+  &rarr; continuous latent vectors [400 frames, 64-dim]
+  &rarr; BigVGAN Decoder &rarr; reconstructed 24kHz waveform</code></pre>
+    </div>
+
+    <p>The latent space is Gaussian - each frame is a 64-dimensional continuous vector. At ~40 Hz frame rate, 10 seconds of audio gives you 400 frames of 64-dimensional vectors.</p>
+
+    <p>Training losses:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">DiTAR VAE Training Losses</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Loss 1</span>
+          <span class="calc-value">Reconstruction (waveform + spectral)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Loss 2</span>
+          <span class="calc-value">KL divergence (latents &rarr; standard normal)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Loss 3</span>
+          <span class="calc-value">Adversarial (MPD + MSD discriminators)</span>
+        </div>
+      </div>
+    </div>
+
+    <p>The VAE is trained as Phase 1, then frozen. The downstream TTS model (DiTAR's language model + LocDiT) operates on these continuous vectors.</p>
+
+    <h3>Why Go Continuous?</h3>
+
+    <p>The argument is simple: quantization is lossy. Every time you round a continuous value to a discrete codebook entry, you lose information. This "quantization error" accumulates across codebooks and limits reconstruction quality.</p>
+
+    <p>With a VAE, theres no quantization step. The latent vectors are continuous. The decoder gets exactly the right information to reconstruct the audio.</p>
+
+    <p>The downside? You cant use standard next-token prediction (softmax over vocabulary) because there is no vocabulary. You need a different generation approach. DiTAR uses flow matching - a diffusion-like process that generates continuous vectors from noise. This requires multiple denoising steps (10 Euler steps in DiTAR) per frame, which is slower than discrete token prediction.</p>
+
+    <h3>Continuous vs Discrete - The Tradeoff</h3>
+
+    <div class="comparison">
+      <div class="comparison-row header two-col">
+        <div class="comparison-cell">Discrete (DAC, NanoCodec, Mimi)</div>
+        <div class="comparison-cell">Continuous (DiTAR VAE)</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">LLM-compatible (softmax, temperature)</div>
+        <div class="comparison-cell">No quantization loss (highest quality)</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Fast inference (1 pass per token)</div>
+        <div class="comparison-cell">No codebook issues</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Natural streaming (token by token)</div>
+        <div class="comparison-cell">Needs diffusion/flow matching head</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">DPO/GRPO alignment straightforward</div>
+        <div class="comparison-cell">Slower inference (multiple steps)</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Quantization error (bitrate ceiling)</div>
+        <div class="comparison-cell">Less natural streaming</div>
+      </div>
+      <div class="comparison-row two-col">
+        <div class="comparison-cell">Codebook management (collapse, seq.)</div>
+        <div class="comparison-cell">Temperature control is different</div>
+      </div>
+    </div>
+
+    <p>The field is genuinely split right now. Koel-TTS (NVIDIA, EMNLP 2025) and likely Sarvam's Bulbul V3 use discrete tokens. DiTAR (ByteDance) and Pocket TTS/CALM (Kyutai) use continuous latents. Both camps claim superior results.</p>
+
+    <p>My personal take: for production streaming TTS with low latency requirements, discrete (especially FSQ) wins today. For highest quality offline generation where latency doesnt matter, continuous wins. The gap is closing though - Pocket TTS showed you can do continuous generation in just 1 step using consistency models, running faster than real-time on CPU.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART VI — The Indic Experiment
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-indic">
+    <div class="section-label">Part VI &mdash; The Experiment</div>
+    <h2>The Indic Benchmark: Testing These Codecs on Indian Languages</h2>
+
+    <p>So remember I said nobody had evaluated these codecs on non-English speech? I decided to actually do it. I ran the first systematic evaluation of neural audio codecs on Indian language speech data - five languages, three codecs, five metrics.</p>
+
+    <h3>The Setup</h3>
+
+    <div class="data-box">
+      <div class="data-box-header">Evaluation Setup</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">Languages</span>
+          <span class="calc-value accent">Hindi, Tamil, Telugu, Bengali, Kannada</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Samples per language</span>
+          <span class="calc-value">10 (duration: 1-10 seconds)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Source data</span>
+          <span class="calc-value">Public HuggingFace speech datasets</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Codecs tested</span>
+          <span class="calc-value accent">DAC (RVQ), EnCodec (RVQ), SNAC (Multi-scale RVQ)</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">All codecs evaluated at</span>
+          <span class="calc-value">24 kHz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Compute</span>
+          <span class="calc-value">Apple M4 GPU (MPS backend)</span>
+        </div>
+      </div>
+    </div>
+
+    <p>Five metrics: PESQ (perceptual quality), STOI (intelligibility), speaker similarity via ECAPA-TDNN embeddings, WER via language-specific Whisper models, and exact ASR transcript match rate. The idea was to test every angle - does the audio sound good? Is it still intelligible? Does it preserve speaker identity? Can downstream ASR still understand it?</p>
+
+    <p>Hindi source data was 48kHz studio quality. Tamil, Telugu, Bengali, and Kannada were 16kHz. This is worth flagging as a confounding variable - Hindi's higher scores might partially reflect better source quality, not just phonological similarity to English.</p>
+
+    <h3>PESQ: Perceptual Quality</h3>
+
+    <div class="comparison">
+      <div class="comparison-row header" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">Codec</div>
+        <div class="comparison-cell">Bengali</div>
+        <div class="comparison-cell">Hindi</div>
+        <div class="comparison-cell">Kannada</div>
+        <div class="comparison-cell">Tamil</div>
+        <div class="comparison-cell">Telugu</div>
+        <div class="comparison-cell">Mean</div>
+      </div>
+      <div class="comparison-row highlight-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">DAC</div>
+        <div class="comparison-cell">4.458</div>
+        <div class="comparison-cell">4.554</div>
+        <div class="comparison-cell">4.454</div>
+        <div class="comparison-cell">4.460</div>
+        <div class="comparison-cell">4.440</div>
+        <div class="comparison-cell">4.473</div>
+      </div>
+      <div class="comparison-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">EnCodec</div>
+        <div class="comparison-cell">2.536</div>
+        <div class="comparison-cell">3.188</div>
+        <div class="comparison-cell">2.725</div>
+        <div class="comparison-cell">2.815</div>
+        <div class="comparison-cell">2.720</div>
+        <div class="comparison-cell">2.797</div>
+      </div>
+      <div class="comparison-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">SNAC</div>
+        <div class="comparison-cell">1.645</div>
+        <div class="comparison-cell">2.374</div>
+        <div class="comparison-cell">1.809</div>
+        <div class="comparison-cell">1.995</div>
+        <div class="comparison-cell">1.784</div>
+        <div class="comparison-cell">1.921</div>
+      </div>
+    </div>
+
+    <p>DAC at 4.473 mean PESQ is near-perfect (scale goes to 4.5). EnCodec at 2.797 is decent but noticeable degradation. SNAC at 1.921 is genuinely poor - Bengali drops to 1.645. Thats bad enough that you'd hear the artifacts clearly.</p>
+
+    <h3>STOI: Intelligibility</h3>
+
+    <div class="comparison">
+      <div class="comparison-row header" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">Codec</div>
+        <div class="comparison-cell">Bengali</div>
+        <div class="comparison-cell">Hindi</div>
+        <div class="comparison-cell">Kannada</div>
+        <div class="comparison-cell">Tamil</div>
+        <div class="comparison-cell">Telugu</div>
+        <div class="comparison-cell">Mean</div>
+      </div>
+      <div class="comparison-row highlight-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">DAC</div>
+        <div class="comparison-cell">0.989</div>
+        <div class="comparison-cell">0.997</div>
+        <div class="comparison-cell">0.992</div>
+        <div class="comparison-cell">0.992</div>
+        <div class="comparison-cell">0.989</div>
+        <div class="comparison-cell">0.992</div>
+      </div>
+      <div class="comparison-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">EnCodec</div>
+        <div class="comparison-cell">0.875</div>
+        <div class="comparison-cell">0.953</div>
+        <div class="comparison-cell">0.911</div>
+        <div class="comparison-cell">0.920</div>
+        <div class="comparison-cell">0.890</div>
+        <div class="comparison-cell">0.910</div>
+      </div>
+      <div class="comparison-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">SNAC</div>
+        <div class="comparison-cell">0.752</div>
+        <div class="comparison-cell">0.931</div>
+        <div class="comparison-cell">0.836</div>
+        <div class="comparison-cell">0.846</div>
+        <div class="comparison-cell">0.773</div>
+        <div class="comparison-cell">0.828</div>
+      </div>
+    </div>
+
+    <p>DAC at 0.992 - nearly identical intelligibility. SNAC loses 17% intelligibility on Bengali (0.752). For a codec that's supposed to reconstruct audio faithfully, losing almost a fifth of your intelligibility is a serious problem.</p>
+
+    <h3>Speaker Similarity: Voice Preservation</h3>
+
+    <div class="comparison">
+      <div class="comparison-row header" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">Codec</div>
+        <div class="comparison-cell">Bengali</div>
+        <div class="comparison-cell">Hindi</div>
+        <div class="comparison-cell">Kannada</div>
+        <div class="comparison-cell">Tamil</div>
+        <div class="comparison-cell">Telugu</div>
+        <div class="comparison-cell">Mean</div>
+      </div>
+      <div class="comparison-row highlight-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">DAC</div>
+        <div class="comparison-cell">0.985</div>
+        <div class="comparison-cell">0.983</div>
+        <div class="comparison-cell">0.988</div>
+        <div class="comparison-cell">0.990</div>
+        <div class="comparison-cell">0.988</div>
+        <div class="comparison-cell">0.987</div>
+      </div>
+      <div class="comparison-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">EnCodec</div>
+        <div class="comparison-cell">0.877</div>
+        <div class="comparison-cell">0.898</div>
+        <div class="comparison-cell">0.903</div>
+        <div class="comparison-cell">0.908</div>
+        <div class="comparison-cell">0.925</div>
+        <div class="comparison-cell">0.902</div>
+      </div>
+      <div class="comparison-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;">
+        <div class="comparison-cell">SNAC</div>
+        <div class="comparison-cell">0.632</div>
+        <div class="comparison-cell">0.755</div>
+        <div class="comparison-cell">0.725</div>
+        <div class="comparison-cell">0.756</div>
+        <div class="comparison-cell">0.730</div>
+        <div class="comparison-cell">0.720</div>
+      </div>
+    </div>
+
+    <p>This one really tells the story. DAC preserves speaker identity almost perfectly at 0.987. EnCodec is acceptable at 0.902. But SNAC? 0.720 mean, and Bengali at 0.632 - thats losing nearly 37% of speaker identity. If you're building a voice cloning or speaker-conditioned TTS pipeline for Indian languages and using SNAC, the voice that comes out the other end won't sound like the person you put in. Thats a dealbreaker.</p>
+
+    <div class="big-numbers">
+      <div class="big-num-cell">
+        <div class="big-num accent">0.987</div>
+        <div class="big-num-label">DAC speaker similarity</div>
+      </div>
+      <div class="big-num-cell dark">
+        <div class="big-num paper">0.720</div>
+        <div class="big-num-label">SNAC speaker similarity</div>
+      </div>
+    </div>
+
+    <h3>WER: ASR Degradation</h3>
+
+    <p>I evaluated WER using language-specific fine-tuned Whisper models. I could only get reliable results for Hindi and Tamil - the Telugu, Bengali, and Kannada ASR models produced hallucinated text, infinite repetition loops, or outputs in the wrong script entirely. Rather than report misleading numbers, I'm reporting WER only where ASR was reliable.</p>
+
+    <div class="comparison">
+      <div class="comparison-row header">
+        <div class="comparison-cell">Codec</div>
+        <div class="comparison-cell">Hindi WER</div>
+        <div class="comparison-cell">Tamil WER</div>
+      </div>
+      <div class="comparison-row highlight-row">
+        <div class="comparison-cell">DAC</div>
+        <div class="comparison-cell">0.178</div>
+        <div class="comparison-cell">0.359</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-cell">EnCodec</div>
+        <div class="comparison-cell">0.184</div>
+        <div class="comparison-cell">0.508</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-cell">SNAC</div>
+        <div class="comparison-cell">0.340</div>
+        <div class="comparison-cell">0.829</div>
+      </div>
+    </div>
+
+    <p>DAC introduces only 17.8% WER on Hindi - minimal degradation. SNAC on Tamil? <strong>82.9% WER.</strong> The reconstructed audio is nearly completely unintelligible to downstream ASR. Tamil is consistently 2-2.4x harder than Hindi across all codecs, likely reflecting Tamil's agglutinative morphology and less representation in codec training data.</p>
+
+    <div class="big-numbers">
+      <div class="big-num-cell">
+        <div class="big-num green">17.8%</div>
+        <div class="big-num-label">DAC WER on Hindi</div>
+      </div>
+      <div class="big-num-cell dark">
+        <div class="big-num paper">82.9%</div>
+        <div class="big-num-label">SNAC WER on Tamil</div>
+      </div>
+    </div>
+
+    <h3>What This Tells Us</h3>
+
+    <p>The codec ranking is unambiguous: <strong>DAC &gt;&gt; EnCodec &gt;&gt; SNAC</strong> for Indian languages. This holds across all five languages and all metrics.</p>
+
+    <div class="pullquote">
+      <p>DAC generalizes remarkably well to Indian languages despite being trained primarily on English. SNAC is not recommended for Indian language applications in its current form - it introduces significant artifacts that degrade both perceived quality and downstream ASR performance.</p>
+    </div>
+
+    <p>Hindi consistently scores highest across all codecs. This may reflect that Hindi's phonological features are closer to English (the dominant training language), or that the Hindi dataset had higher recording quality (48kHz studio vs 16kHz for others). Bengali and Telugu consistently score lowest - their distinct phonological features (retroflex consonants, aspiration patterns) appear to be less well-captured by English-trained codecs.</p>
+
+    <p>A few important caveats: this is 10 samples per language, not hundreds. PESQ was designed for English speech - the absolute numbers might not perfectly reflect what a native speaker perceives. And I couldn't test NanoCodec (dependency issues) or Mimi (not packaged for easy evaluation) - both of which would be very interesting to benchmark given their architectural differences.</p>
+
+    <p>But the signal is clear enough. If you're building speech AI for Indian languages today and you need to pick a codec - use DAC. Not SNAC. Not EnCodec. DAC.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       PART VII — The Big Picture
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-big-picture">
+    <div class="section-label">Part VII</div>
+    <h2>The Big Picture</h2>
+
+    <p>Lets put it all together:</p>
+
+    <div class="data-box">
+      <div class="data-box-header">Neural Audio Codec Timeline</div>
+      <div class="data-box-body">
+        <div class="calc-row">
+          <span class="calc-label">2022</span>
+          <span class="calc-value">EnCodec (Meta) &mdash; RVQ, proved codecs work</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">2023</span>
+          <span class="calc-value">DAC (Descript) &mdash; RVQ, better quality</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">2024</span>
+          <span class="calc-value accent">Mimi (Kyutai) &mdash; RVQ + semantic, 12.5Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">2024</span>
+          <span class="calc-value accent">NanoCodec (NVIDIA) &mdash; FSQ, parallel, 21.5Hz</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">2025</span>
+          <span class="calc-value green">DiTAR VAE (ByteDance) &mdash; continuous, no VQ</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">2025</span>
+          <span class="calc-value green">Pocket TTS (Kyutai) &mdash; continuous, 1-step</span>
+        </div>
+      </div>
+    </div>
+
+    <p>The trend is clear:</p>
+
+    <div class="analogy-map">
+      <div class="analogy-map-header">The Trends</div>
+      <div class="analogy-row">
+        <span class="analogy-left">Frame rates</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Going DOWN (86 &rarr; 21.5 &rarr; 12.5 Hz)</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">CB independence</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Going UP (RVQ sequential &rarr; FSQ parallel)</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Semantic awareness</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Built IN (Mimi distillation)</span>
+      </div>
+      <div class="analogy-row">
+        <span class="analogy-left">Discretization</span>
+        <span class="analogy-arrow">&rarr;</span>
+        <span class="analogy-right">Some abandoning entirely (DiTAR, CALM)</span>
+      </div>
+    </div>
+
+    <p>And as I showed in the Indic experiment above - evaluating these codecs on non-English speech reveals dramatic differences. DAC generalizes remarkably well (PESQ 4.473 across five Indian languages), while SNAC nearly collapses (82.9% WER on Tamil). The codec you pick matters enormously, and evaluating only on English hides these failure modes entirely.</p>
+
+    <p>The open questions that remain: do these codecs faithfully reconstruct retroflex consonants? Aspirated sounds? Code-switched Hinglish? These need minimal pair evaluations that go beyond aggregate metrics. And we need to test NanoCodec, Mimi, and the newer codecs on Indic data too. This evaluation was a starting point - 10 samples per language, three codecs. The full picture needs 22 languages, phoneme-class-specific analysis, and subjective listening tests with native speakers. But the signal is already clear enough to make production decisions today.</p>
+  </div>
+
+  <div class="divider"><div class="divider-mark">&middot; &middot; &middot;</div></div>
+
+  <!-- ════════════════════════════════════════
+       CONTACT
+       ════════════════════════════════════════ -->
+  <div class="section" id="s-contact">
+    <p><em>If you found this useful, feel free to ping me to ask anything related here:</em></p>
+    <p>Thanks to Claude for helping me organize my thoughts on this. All the understanding comes from actually working with these systems - the writing just needed a push.</p>
+    <div class="contact-links">
+      <a class="contact-link" href="mailto:amannagrawall002@gmail.com">Email</a>
+      <a class="contact-link" href="https://x.com/r4plh">Twitter</a>
+      <a class="contact-link" href="https://github.com/r4plh">GitHub</a>
+      <a class="contact-link" href="https://www.linkedin.com/in/r4plh/">LinkedIn</a>
+      <a class="contact-link" href="https://r4plh.github.io">Portfolio</a>
+    </div>
+  </div>
+
+  <div style="height: 60px;"></div>
+
+  <!-- COMMENTS -->
+  <div class="section visible" id="comments">
+    <div class="section-label">Discussion</div>
+    <h2>Comments</h2>
+    <script src="https://giscus.app/client.js"
+        data-repo="r4plh/r4plh.github.io"
+        data-repo-id="R_kgDONoAmYw"
+        data-category="General"
+        data-category-id="DIC_kwDONoAmY84C3y-n"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="noborder_dark"
+        data-lang="en"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+    </script>
+  </div>
+
+  <div style="height: 80px;"></div>
+
+</article>
+
+<footer>
+  <div style="font-size:14px; color: rgba(247,243,238,0.6); font-family: 'Playfair Display', serif; font-style:italic; margin-bottom: 12px;">
+    "The paradigm shift: from continuous lossy representations to discrete near-lossless tokens."
+  </div>
+  A deep dive into <strong>neural audio codecs</strong> &mdash; <strong>RVQ</strong>, <strong>FSQ</strong>, <strong>semantic distillation</strong>, and <strong>continuous VAE</strong> approaches from first principles
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
