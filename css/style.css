@@ -1174,187 +1174,128 @@ img { display: block; max-width: 100%; }
 
 .pub-card:hover .pub-link { gap: 10px; }
 
-/* ---------- Featured Publications ---------- */
-.featured-pubs {
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
+/* ---------- Writing Grid (ines.io style) ---------- */
+.writing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
     margin-bottom: 8px;
 }
 
-.featured-pubs-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.015);
-}
-
-.featured-pubs-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.featured-pubs-badge {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #fff;
-    background: var(--accent);
-    padding: 3px 10px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.featured-pubs-count {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--text-muted);
-}
-
-.featured-pubs-grid {
-    display: flex;
-    flex-direction: column;
-}
-
-.featured-pub-card {
-    display: flex;
-    gap: 20px;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.2s var(--ease);
+.writing-card {
+    display: block;
+    background: var(--bg-raised);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
     text-decoration: none;
     color: inherit;
 }
 
-.featured-pub-card:last-child {
-    border-bottom: none;
+.writing-card:hover {
+    transform: scale(1.02) rotate(-0.5deg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
-.featured-pub-card:hover {
-    background: rgba(232, 168, 73, 0.03);
+.writing-card-thumb {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.featured-pub-number {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    font-weight: 600;
+.writing-card-thumb i {
+    font-size: 2.2rem;
     color: var(--accent);
-    opacity: 0.5;
-    flex-shrink: 0;
-    padding-top: 3px;
-    min-width: 24px;
+    opacity: 0.35;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
 
-.featured-pub-content {
-    flex: 1;
-    min-width: 0;
+.writing-card:hover .writing-card-thumb i {
+    opacity: 0.55;
+    transform: scale(1.1);
 }
 
-.featured-pub-content h3 {
-    font-size: 0.95rem;
+.writing-card-thumb-blog i {
+    color: var(--green);
+}
+
+.writing-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s var(--ease);
+}
+
+.writing-card:hover .writing-card-thumb img {
+    transform: scale(1.05);
+}
+
+.writing-card-body {
+    padding: 24px 24px 20px;
+}
+
+.writing-card-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.writing-pill {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+}
+
+.writing-pill-tds {
+    color: var(--accent);
+    background: var(--accent-dim);
+    font-weight: 600;
+}
+
+.writing-pill-blog {
+    color: var(--green);
+    background: rgba(110, 200, 122, 0.1);
+    font-weight: 600;
+}
+
+.writing-pill-medium {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: 600;
+}
+
+.writing-card-body h3 {
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
     line-height: 1.4;
+    margin-bottom: 8px;
 }
 
-.featured-pub-content p {
+.writing-card-body p {
     font-size: 0.82rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
 }
 
-.featured-pub-meta {
+.writing-card-foot {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.featured-pub-tag {
-    font-family: var(--mono);
-    font-size: 0.62rem;
-    color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border);
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.featured-pub-meta .pub-link {
-    margin-left: auto;
-}
-
-/* ---------- Writing Sub-headings ---------- */
-.writing-sub-heading {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 16px;
-}
-
-/* ---------- Blog Cards (inline) ---------- */
-.blog-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.blog-card-inline {
-    display: block;
-    padding: 24px;
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    transition: all 0.3s var(--ease);
-}
-
-.blog-card-inline:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-}
-
-.blog-card-tag {
+    gap: 6px;
     font-family: var(--mono);
     font-size: 0.68rem;
-    font-weight: 500;
-    color: var(--accent);
-    background: var(--accent-dim);
-    border: 1px solid var(--accent-border);
-    padding: 3px 10px;
-    border-radius: 999px;
-    display: inline-block;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.blog-card-inline h4 {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 6px;
-    line-height: 1.4;
-}
-
-.blog-card-inline p {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 10px;
+    color: var(--text-muted);
 }
 
 .pub-more {
@@ -1543,6 +1484,7 @@ img { display: block; max-width: 100%; }
 
     .project-grid { grid-template-columns: 1fr; }
     .stack-grid { grid-template-columns: 1fr; }
+    .writing-grid { grid-template-columns: 1fr; }
     .pub-grid { grid-template-columns: 1fr; }
     .achievements-grid { grid-template-columns: 1fr; }
 

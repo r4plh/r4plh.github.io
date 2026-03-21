@@ -15,16 +15,14 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 :root {
-    --bg: #09090b;
-    --bg-raised: #111113;
-    --border: rgba(255,255,255,0.06);
-    --border-hover: rgba(255,255,255,0.12);
-    --text-primary: #fafafa;
-    --text-secondary: #a1a1aa;
-    --text-muted: #52525b;
-    --accent: #818cf8;
-    --accent-dim: rgba(129,140,248,0.1);
-    --accent-border: rgba(129,140,248,0.2);
+    --bg: #0f0e0c;
+    --bg-raised: #171614;
+    --text-primary: #f5f0e8;
+    --text-secondary: #a89f91;
+    --text-muted: #5c564d;
+    --accent: #e8a849;
+    --accent-dim: rgba(232,168,73,0.1);
+    --green: #6ec87a;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --mono: 'JetBrains Mono', monospace;
     --ease: cubic-bezier(0.4,0,0.2,1);
@@ -32,11 +30,11 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--font);background:var(--bg);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-::selection{background:rgba(129,140,248,0.25);color:#fff}
+::selection{background:rgba(232,168,73,0.25);color:#fff}
 
 .top-bar{
     padding:20px 24px;
-    max-width:760px;
+    max-width:960px;
     margin:0 auto;
 }
 .back-link{
@@ -50,7 +48,7 @@ a{color:inherit;text-decoration:none}
 .back-link:hover{color:var(--accent)}
 
 .blog-header{
-    max-width:760px;
+    max-width:960px;
     margin:0 auto;
     padding:60px 24px 48px;
 }
@@ -65,74 +63,108 @@ a{color:inherit;text-decoration:none}
     font-size:0.95rem;
 }
 
-.blog-list{
-    max-width:760px;
+.blog-grid{
+    max-width:960px;
     margin:0 auto;
     padding:0 24px 80px;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:24px;
 }
 
-.blog-item{
+.blog-card{
     display:block;
-    padding:28px;
     background:var(--bg-raised);
-    border:1px solid var(--border);
     border-radius:12px;
-    transition:all 0.3s var(--ease);
+    overflow:hidden;
+    transition:transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    box-shadow:0 2px 12px rgba(0,0,0,0.25);
 }
-.blog-item:hover{
-    border-color:var(--border-hover);
-    transform:translateY(-2px);
+.blog-card:hover{
+    transform:scale(1.02) rotate(-0.5deg);
+    box-shadow:0 8px 32px rgba(0,0,0,0.45);
 }
-.blog-item-tag{
-    font-family:var(--mono);
-    font-size:0.68rem;
-    color:var(--accent);
-    background:var(--accent-dim);
-    border:1px solid var(--accent-border);
-    padding:3px 10px;
-    border-radius:999px;
-    display:inline-block;
-    margin-bottom:12px;
-    text-transform:uppercase;
-    letter-spacing:0.04em;
-}
-.blog-item h2{
-    font-size:1.15rem;
-    font-weight:600;
-    margin-bottom:8px;
-    line-height:1.4;
-}
-.blog-item p{
-    color:var(--text-secondary);
-    font-size:0.88rem;
-    line-height:1.6;
-    margin-bottom:12px;
-}
-.blog-item-meta{
-    font-family:var(--mono);
-    font-size:0.7rem;
-    color:var(--text-muted);
+
+.blog-card-thumb{
+    height:140px;
     display:flex;
     align-items:center;
-    gap:16px;
+    justify-content:center;
+    overflow:hidden;
 }
-.read-link{
-    font-size:0.78rem;
+.blog-card-thumb i{
+    font-size:2.2rem;
+    color:var(--green);
+    opacity:0.35;
+    transition:opacity 0.3s var(--ease),transform 0.3s var(--ease);
+}
+.blog-card:hover .blog-card-thumb i{
+    opacity:0.55;
+    transform:scale(1.1);
+}
+.blog-card-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform 0.5s var(--ease);
+}
+.blog-card:hover .blog-card-thumb img{
+    transform:scale(1.05);
+}
+
+.blog-card-body{
+    padding:24px 24px 20px;
+}
+
+.blog-card-pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+}
+
+.blog-pill{
+    font-family:var(--mono);
+    font-size:0.62rem;
     font-weight:500;
-    color:var(--accent);
-    display:inline-flex;
+    color:var(--text-muted);
+    background:rgba(255,255,255,0.04);
+    padding:3px 10px;
+    border-radius:4px;
+    letter-spacing:0.02em;
+}
+
+.blog-pill-topic{
+    color:var(--green);
+    background:rgba(110,200,122,0.1);
+    font-weight:600;
+}
+
+.blog-card-body h2{
+    font-size:1rem;
+    font-weight:600;
+    line-height:1.4;
+    margin-bottom:8px;
+}
+.blog-card-body p{
+    color:var(--text-secondary);
+    font-size:0.82rem;
+    line-height:1.6;
+    margin-bottom:14px;
+}
+.blog-card-foot{
+    display:flex;
     align-items:center;
     gap:6px;
+    font-family:var(--mono);
+    font-size:0.68rem;
+    color:var(--text-muted);
 }
 
-@media(max-width:600px){
+@media(max-width:700px){
     .blog-header{padding:40px 16px 32px}
     .blog-header h1{font-size:1.6rem}
-    .blog-list{padding:0 16px 60px}
-    .blog-item{padding:20px}
+    .blog-grid{grid-template-columns:1fr;padding:0 16px 60px}
 }
 </style>
 </head>
@@ -147,49 +179,73 @@ a{color:inherit;text-decoration:none}
     <p>Writing about audio signal processing, speech enhancement, and the math behind AI.</p>
 </header>
 
-<div class="blog-list">
+<div class="blog-grid">
 
-    <a href="codecs.html" class="blog-item">
-        <span class="blog-item-tag">Neural Audio Codecs &middot; RVQ &middot; Indic</span>
-        <h2>Neural Audio Codecs &mdash; Dissected, Compared, and Benchmarked on Indian Languages</h2>
-        <p>Four codec architectures from first principles. The first systematic evaluation on five Indian languages. Your choice of codec matters more than you think.</p>
-        <div class="blog-item-meta">
-            <span>Mar 2026</span>
-            <span>~25 min read</span>
-            <span class="read-link">Read <i class="fa-solid fa-arrow-right"></i></span>
+    <a href="codecs.html" class="blog-card">
+        <div class="blog-card-thumb" style="background:linear-gradient(135deg,#0e1810,#142818,#0e1810)"><i class="fa-solid fa-microchip"></i></div>
+        <div class="blog-card-body">
+            <div class="blog-card-pills">
+                <span class="blog-pill blog-pill-topic">Neural Codecs</span>
+                <span class="blog-pill">RVQ &middot; Indic</span>
+            </div>
+            <h2>Neural Audio Codecs &mdash; Dissected, Compared, and Benchmarked on Indian Languages</h2>
+            <p>Four codec architectures from first principles. The first systematic evaluation on five Indian languages.</p>
+            <div class="blog-card-foot">
+                <span>Mar 2026</span>
+                <span>&middot;</span>
+                <span>~25 min</span>
+            </div>
         </div>
     </a>
 
-    <a href="fourier.html" class="blog-item">
-        <span class="blog-item-tag">Signal Processing &middot; Math</span>
-        <h2>Understanding the Fourier Transform: An Intuitive Approach to Sound Frequency Analysis</h2>
-        <p>From winding machines to the centre of mass — building deep intuition for how the Fourier Transform decomposes sound into frequencies, without drowning in derivations.</p>
-        <div class="blog-item-meta">
-            <span>Mar 2026</span>
-            <span>~18 min read</span>
-            <span class="read-link">Read <i class="fa-solid fa-arrow-right"></i></span>
+    <a href="fourier.html" class="blog-card">
+        <div class="blog-card-thumb"><img src="fourier-assets/fig1-time-to-frequency.png" alt="Fourier Transform" loading="lazy"></div>
+        <div class="blog-card-body">
+            <div class="blog-card-pills">
+                <span class="blog-pill blog-pill-topic">Signal Processing</span>
+                <span class="blog-pill">Math</span>
+            </div>
+            <h2>Understanding the Fourier Transform: An Intuitive Approach</h2>
+            <p>From winding machines to the centre of mass &mdash; building deep intuition for frequency decomposition.</p>
+            <div class="blog-card-foot">
+                <span>Mar 2026</span>
+                <span>&middot;</span>
+                <span>~18 min</span>
+            </div>
         </div>
     </a>
 
-    <a href="aliasing.html" class="blog-item">
-        <span class="blog-item-tag">Signal Processing</span>
-        <h2>Understanding the Foundational Distortion of Digital Audio</h2>
-        <p>From first principles, with worked examples and visual intuition — why spinning wheels go backward, why cheap recordings sound harsh, and why it all traces back to one elegant rule.</p>
-        <div class="blog-item-meta">
-            <span>Feb 2026</span>
-            <span>~15 min read</span>
-            <span class="read-link">Read <i class="fa-solid fa-arrow-right"></i></span>
+    <a href="aliasing.html" class="blog-card">
+        <div class="blog-card-thumb"><img src="aliasing-assets/fig1-false-identity.png" alt="Aliasing" loading="lazy"></div>
+        <div class="blog-card-body">
+            <div class="blog-card-pills">
+                <span class="blog-pill blog-pill-topic">Signal Processing</span>
+                <span class="blog-pill">Audio</span>
+            </div>
+            <h2>Understanding the Foundational Distortion of Digital Audio</h2>
+            <p>From first principles &mdash; why spinning wheels go backward, why cheap recordings sound harsh, and why it traces back to one elegant rule.</p>
+            <div class="blog-card-foot">
+                <span>Feb 2026</span>
+                <span>&middot;</span>
+                <span>~15 min</span>
+            </div>
         </div>
     </a>
 
-    <a href="grey-bar.html" class="blog-item">
-        <span class="blog-item-tag">Audio &middot; Codecs</span>
-        <h2>The Grey Bar — A Story About Sound, Data & Childhood Curiosity</h2>
-        <p>A story about childhood curiosity, sound waves, compression, and the invisible machinery behind every song you've ever streamed.</p>
-        <div class="blog-item-meta">
-            <span>Feb 2026</span>
-            <span>~12 min read</span>
-            <span class="read-link">Read <i class="fa-solid fa-arrow-right"></i></span>
+    <a href="grey-bar.html" class="blog-card">
+        <div class="blog-card-thumb" style="background:linear-gradient(135deg,#10160e,#182412,#10160e)"><i class="fa-solid fa-compact-disc"></i></div>
+        <div class="blog-card-body">
+            <div class="blog-card-pills">
+                <span class="blog-pill blog-pill-topic">Audio</span>
+                <span class="blog-pill">Codecs</span>
+            </div>
+            <h2>The Grey Bar &mdash; Sound, Data &amp; Childhood Curiosity</h2>
+            <p>A story about sound waves, compression, and the invisible machinery behind every song you've ever streamed.</p>
+            <div class="blog-card-foot">
+                <span>Feb 2026</span>
+                <span>&middot;</span>
+                <span>~12 min</span>
+            </div>
         </div>
     </a>
 
